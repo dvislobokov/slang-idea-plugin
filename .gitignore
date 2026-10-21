@@ -1,0 +1,11 @@
+# Gradle / IntelliJ Platform Gradle Plugin
+.gradle/
+build/
+.intellijPlatform/
+.kotlin/
+out/
+
+# IDE
+.idea/
+*.iml
+.DS_Store

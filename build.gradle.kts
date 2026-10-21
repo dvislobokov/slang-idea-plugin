@@ -1,0 +1,102 @@
+import org.jetbrains.grammarkit.tasks.GenerateLexerTask
+import org.jetbrains.grammarkit.tasks.GenerateParserTask
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+
+plugins {
+    id("java")
+    id("org.jetbrains.kotlin.jvm") version "2.0.21"
+    // The version comes from the settings plugin in settings.gradle.kts (2.9.0,
+    // the newest 2.x that still runs on Gradle 8.10; 2.10+ needs Gradle 8.13).
+    id("org.jetbrains.intellij.platform")
+    id("org.jetbrains.grammarkit") version "2022.3.2.2"
+}
+
+group = providers.gradleProperty("pluginGroup").get()
+version = providers.gradleProperty("pluginVersion").get()
+
+// IntelliJ Platform 2024.2 (242) runs on and is compiled for Java 21.
+kotlin {
+    jvmToolchain(21)
+    compilerOptions {
+        // Do not use stdlib API newer than the Kotlin bundled with 2024.2.
+        apiVersion = KotlinVersion.KOTLIN_1_9
+    }
+}
+
+sourceSets {
+    main {
+        // Grammar-Kit / JFlex output (committed, see CLAUDE.md).
+        java.srcDir("src/main/gen")
+    }
+}
+
+dependencies {
+    intellijPlatform {
+        // The platform LSP API (com.intellij.platform.lsp.api) is only in commercial IDEs.
+        intellijIdeaUltimate(providers.gradleProperty("platformVersion"))
+        testFramework(TestFrameworkType.Platform)
+        pluginVerifier()
+        zipSigner()
+    }
+    testImplementation("junit:junit:4.13.2")
+}
+
+intellijPlatform {
+    // No forms and no @NotNull instrumentation needed; avoids the extra
+    // instrumentation-tools download.
+    instrumentCode = false
+    buildSearchableOptions = false
+
+    pluginConfiguration {
+        id = "org.slang.idea"
+        name = providers.gradleProperty("pluginName")
+        version = providers.gradleProperty("pluginVersion")
+        ideaVersion {
+            sinceBuild = providers.gradleProperty("pluginSinceBuild")
+            untilBuild = providers.gradleProperty("pluginUntilBuild")
+        }
+    }
+
+    pluginVerification {
+        ides {
+            // The plugin must load in Community (without LSP) and in Ultimate (with LSP).
+            create(IntelliJPlatformType.IntellijIdeaCommunity, "2024.2.4")
+            create(IntelliJPlatformType.IntellijIdeaUltimate, "2024.2.4")
+            create(IntelliJPlatformType.IntellijIdeaUltimate, "2025.2")
+            create(IntelliJPlatformType.GoLand, "2024.2.3")
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Grammar-Kit: lexer from src/main/grammar/Slang.flex, parser + PSI from
+// src/main/grammar/Slang.bnf (copied from the slang repo by tools/sync-slang.sh).
+// ---------------------------------------------------------------------------
+
+val generateSlangLexer by tasks.registering(GenerateLexerTask::class) {
+    sourceFile = layout.projectDirectory.file("src/main/grammar/Slang.flex")
+    // purgeOldFiles wipes this whole directory: keep it lexer-only.
+    targetOutputDir = layout.projectDirectory.dir("src/main/gen/org/slang/idea/lexer")
+    purgeOldFiles = true
+}
+
+val generateSlangParser by tasks.registering(GenerateParserTask::class) {
+    sourceFile = layout.projectDirectory.file("src/main/grammar/Slang.bnf")
+    targetRootOutputDir = layout.projectDirectory.dir("src/main/gen")
+    pathToParser = "org/slang/idea/parser/SlangParser.java"
+    pathToPsiRoot = "org/slang/idea/psi"
+    purgeOldFiles = true
+}
+
+tasks {
+    compileJava { dependsOn(generateSlangLexer, generateSlangParser) }
+    compileKotlin { dependsOn(generateSlangLexer, generateSlangParser) }
+
+    test {
+        // The parser corpus test reads build/slang (tools/sync-slang.sh).
+        systemProperty("slang.corpus", layout.buildDirectory.dir("slang").get().asFile.absolutePath)
+        inputs.dir(layout.buildDirectory.dir("slang")).optional().withPropertyName("slangCorpus")
+    }
+}
