@@ -69,7 +69,7 @@ class SlangLspServerDescriptor(project: Project) : ProjectWideLspServerDescripto
         (SlangToolchain.lspCommandLine() ?: error("slang-lsp not found"))
             .withWorkDirectory(project.basePath)
 
-    /** `slang` is the language id slang-lsp expects (editors/vscode uses it too). */
+    /** `slang` is the language id slang-lsp expects (editors/vscode uses it too). TODO(verify): overridable in 242. */
     override fun getLanguageId(file: VirtualFile): String = "slang"
 
     // TODO(verify): in 2024.2 these are `open val`s of LspServerDescriptor with

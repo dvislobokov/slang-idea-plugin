@@ -46,9 +46,10 @@ there before writing code:
   attached as a library root so PSI-based features (structure, search by
   name, go-to-file) see std sources; navigation into std comes from the LSP,
   which already indexes `std/` and `.slang/deps`.
-- **Target**: IntelliJ Platform 2024.2+, JDK 17 for the build, Kotlin,
-  `org.jetbrains.intellij.platform` Gradle plugin 2.x. Keep
-  `pluginSinceBuild` honest.
+- **Target**: IntelliJ Platform 2024.2+ (since 242, until 252.*), JDK 21
+  for the build (242 is compiled for Java 21), Kotlin,
+  `org.jetbrains.intellij.platform` Gradle plugin 2.x (2.9.0: the newest
+  that runs on Gradle 8.10). Keep `pluginSinceBuild` honest.
 - **Toolchain detection**: `slang` and `slang-lsp` on PATH, `SLANG_HOME`,
   or paths in settings; show versions; offer to download via the install
   script from the slang repo (`scripts/install.sh` / `install.ps1`); restart
@@ -60,8 +61,8 @@ there before writing code:
 build.gradle.kts, settings.gradle.kts, gradle.properties
 src/main/kotlin/org/slang/idea/
   lang/        SlangLanguage, SlangFileType, SlangFile, icons
-  lexer/       Slang.flex (JFlex, generated from the BNF tokens) + semicolon insertion layer
-  parser/      SlangParserDefinition, generated parser (gen/), error recovery tweaks
+  lexer/       SlangLexer (semicolon insertion, `>>` split) over the JFlex lexer; SlangHighlightingLexer
+  parser/      SlangParserDefinition (SlangParserUtil is Java: src/main/java/org/slang/idea/parser)
   psi/         PSI interfaces + impl mixins (named elements for structure view, go-to-symbol), element types
   stubs/       stub indexes for declarations (structure/search by name only; semantics come from the LSP)
   lsp/         LspServerSupportProvider + ProjectWideLspServerDescriptor for slang-lsp, settings (inlay hints), restart action, custom LSP requests if needed
@@ -72,15 +73,20 @@ src/main/kotlin/org/slang/idea/
   debug/       XDebugProcess over DAP to the in-process agent (breakpoints, stepping per task, variables)
   toolchain/   locating slang/slang-lsp, SLANG_HOME, std root, versions, settings UI
   templates/   live templates, file templates, new-project wizard (`slang init`)
-src/main/resources/META-INF/plugin.xml, icons, colorSchemes, fileTemplates, inspectionDescriptions
+src/main/grammar/  Slang.bnf (synced, do not edit) and Slang.flex (JFlex lexer mirroring compiler/src/lexer.rs)
+src/main/gen/      Grammar-Kit/JFlex output (committed)
+src/main/resources/META-INF/plugin.xml (+ slang-lsp.xml, optional on com.intellij.modules.ultimate), icons, colorSchemes, fileTemplates, inspectionDescriptions
 src/test/kotlin/   BasePlatformTestCase tests + the corpus test
 src/test/testData/ fixtures
 tools/sync-slang.sh  fetches the slang repo at the pinned commit into build/slang (grammar, std, corpus)
+tools/grammar-patches/  pending upstream fixes to grammar/slang.bnf, applied by the sync script
 ```
 
 ## Build and test
 
 ```sh
+tools/sync-slang.sh            # build/slang at slangCommit + src/main/grammar/Slang.bnf (run first)
+./gradlew generateSlangLexer generateSlangParser   # regenerate src/main/gen after grammar changes
 ./gradlew buildPlugin          # produces build/distributions/*.zip
 ./gradlew test                 # headless platform tests, incl. the parser corpus test
 ./gradlew runIde               # launches a sandbox IDE (needs a desktop)
@@ -89,9 +95,14 @@ tools/sync-slang.sh  fetches the slang repo at the pinned commit into build/slan
 
 `tools/sync-slang.sh` clones `dvislobokov/slang` at the commit pinned in
 `gradle.properties` (`slangCommit=...`) into `build/slang`; the parser
-corpus test parses every `examples/**/*.sl` and `tests/spec/**/*.sl` (except
+corpus test parses every `examples/**/*.sl`, `tests/spec/**/*.sl` and `std/**/*.sl` (except
 files whose first line marks a lexer error) and fails on any `PsiErrorElement`.
 Bump `slangCommit` deliberately; when the grammar changes upstream, regenerate.
+Rule fixes the plugin needs before upstream has them live as unified diffs
+against upstream `grammar/slang.bnf` in `tools/grammar-patches/` (applied by
+the sync script, skipped once upstream contains them); send them upstream
+and delete them, never edit `src/main/grammar/Slang.bnf` by hand.
+`FIRST_RUN.md` is the checklist for the first build with network access.
 
 Grammar-Kit generation is a Gradle task (`generateSlangParser`,
 `generateSlangLexer`) with outputs under `src/main/gen` (committed, so IDE

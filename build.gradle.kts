@@ -36,6 +36,10 @@ dependencies {
     intellijPlatform {
         // The platform LSP API (com.intellij.platform.lsp.api) is only in commercial IDEs.
         intellijIdeaUltimate(providers.gradleProperty("platformVersion"))
+        // TODO(verify): if compileKotlin cannot resolve com.intellij.platform.lsp.*, the LSP
+        // API jar is a separate platform module in this IDE layout; add it explicitly:
+        //   bundledModule("intellij.platform.lsp.impl")
+        // (https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html)
         testFramework(TestFrameworkType.Platform)
         pluginVerifier()
         zipSigner()
@@ -62,6 +66,8 @@ intellijPlatform {
     pluginVerification {
         ides {
             // The plugin must load in Community (without LSP) and in Ultimate (with LSP).
+            // TODO(verify): these exact releases resolve (`./gradlew printProductsReleases`);
+            // `recommended()` is the alternative.
             create(IntelliJPlatformType.IntellijIdeaCommunity, "2024.2.4")
             create(IntelliJPlatformType.IntellijIdeaUltimate, "2024.2.4")
             create(IntelliJPlatformType.IntellijIdeaUltimate, "2025.2")

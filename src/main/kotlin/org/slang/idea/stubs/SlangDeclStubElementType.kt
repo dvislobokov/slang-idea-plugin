@@ -28,6 +28,9 @@ class SlangDeclStubElementType(debugName: String) :
 
     override fun getExternalId(): String = "slang.$debugName"
 
+    // TODO(verify): the generated class names (Grammar-Kit: psiClassPrefix + rule name in
+    // CamelCase + psiImplClassSuffix) and their (stub, IStubElementType) constructors,
+    // after `./gradlew generateSlangParser` (src/main/gen/org/slang/idea/psi/impl).
     override fun createPsi(stub: SlangDeclStub): SlangNamedElement = when (debugName) {
         "STRUCT_DECL" -> SlangStructDeclImpl(stub, this)
         "INTERFACE_DECL" -> SlangInterfaceDeclImpl(stub, this)
