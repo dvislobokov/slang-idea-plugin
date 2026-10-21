@@ -44,8 +44,10 @@ class SlangStructureViewModel(file: SlangFile, editor: Editor?) :
 
     override fun isAlwaysShowsPlus(element: StructureViewTreeElement): Boolean = false
 
-    override fun isAlwaysLeaf(element: StructureViewTreeElement): Boolean =
-        (element as? SlangStructureViewElement)?.let { it.node?.elementType !in CONTAINERS } ?: false
+    override fun isAlwaysLeaf(element: StructureViewTreeElement): Boolean {
+        val e = element as? SlangStructureViewElement ?: return false
+        return e.element !is SlangFile && e.node?.elementType !in CONTAINERS
+    }
 
     private companion object {
         val CONTAINERS = setOf(SlangTypes.STRUCT_DECL, SlangTypes.INTERFACE_DECL, SlangTypes.ENUM_DECL)
