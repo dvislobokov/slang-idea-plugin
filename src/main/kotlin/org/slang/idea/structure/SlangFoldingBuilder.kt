@@ -57,17 +57,15 @@ class SlangFoldingBuilder : FoldingBuilderEx(), DumbAware {
         val start = first.findChildByType(SlangTypes.QUALIFIED_NAME)?.startOffset ?: return
         // import_decl ends with its (zero-width, automatic) semicolon.
         val end = imports.last().textRange.endOffset
-        if (end > start) out.add(FoldingDescriptor(first, TextRange(start, end)))
+        if (end <= start) return
+        val collapsed = CodeFoldingSettings.getInstance().COLLAPSE_IMPORTS
+        out.add(FoldingDescriptor(first, TextRange(start, end), null, "...", collapsed, emptySet()))
     }
 
-    override fun getPlaceholderText(node: ASTNode): String = when (node.elementType) {
-        SlangTokenTypes.BLOCK_COMMENT -> "/*...*/"
-        SlangTypes.IMPORT_DECL -> "..."
-        else -> "{...}"
-    }
+    override fun getPlaceholderText(node: ASTNode): String =
+        if (node.elementType == SlangTokenTypes.BLOCK_COMMENT) "/*...*/" else "{...}"
 
-    override fun isCollapsedByDefault(node: ASTNode): Boolean =
-        node.elementType == SlangTypes.IMPORT_DECL && CodeFoldingSettings.getInstance().COLLAPSE_IMPORTS
+    override fun isCollapsedByDefault(node: ASTNode): Boolean = false
 
     private companion object {
         val BRACED = setOf(
