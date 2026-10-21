@@ -1,0 +1,18 @@
+<!-- Loaded only when com.intellij.modules.ultimate is present (the platform LSP API). -->
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <platform.lsp.serverSupportProvider implementation="org.slang.idea.lsp.SlangLspServerSupportProvider"/>
+    </extensions>
+
+    <applicationListeners>
+        <listener class="org.slang.idea.lsp.SlangLspRestartAction$ToolchainListener"
+                  topic="org.slang.idea.toolchain.SlangToolchain$Listener"/>
+    </applicationListeners>
+
+    <actions>
+        <action id="org.slang.idea.lsp.Restart" class="org.slang.idea.lsp.SlangLspRestartAction"
+                text="Restart Slang Language Server" description="Stop slang-lsp and start it again">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

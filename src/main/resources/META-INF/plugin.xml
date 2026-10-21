@@ -1,0 +1,59 @@
+<!-- Slang language support. Grammar-Kit PSI for syntax; slang-lsp (platform LSP API) for semantics. -->
+<idea-plugin>
+    <id>org.slang.idea</id>
+    <name>Slang</name>
+    <vendor url="https://github.com/dvislobokov/slang">Slang</vendor>
+
+    <description><![CDATA[
+    Support for the <a href="https://github.com/dvislobokov/slang">Slang</a> programming language.
+    <ul>
+      <li>Syntax highlighting, brace matching, commenting, folding, structure view and Go to Symbol for <code>.sl</code> files</li>
+      <li>The standard library (<code>slang env SLANG_STD</code>) attached as an external library</li>
+      <li>In IntelliJ IDEA Ultimate, GoLand and other commercial IDEs: diagnostics, navigation, hover, completion,
+          rename, code actions, semantic highlighting and formatting from the <code>slang-lsp</code> language server</li>
+    </ul>
+    ]]></description>
+
+    <!-- Version range and change notes are patched in from gradle.properties by the Gradle build. -->
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <!-- The platform LSP API exists only in commercial IDEs; without it the plugin
+         still loads (PSI features only). -->
+    <depends optional="true" config-file="slang-lsp.xml">com.intellij.modules.ultimate</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Slang" language="Slang" extensions="sl"
+                  implementationClass="org.slang.idea.lang.SlangFileType" fieldName="INSTANCE"/>
+        <lang.parserDefinition language="Slang" implementationClass="org.slang.idea.parser.SlangParserDefinition"/>
+
+        <!-- Stub element types are fields of the generated interface SlangTypes; their
+             external ids are "slang." + field name (SlangDeclStubElementType). -->
+        <stubElementTypeHolder class="org.slang.idea.psi.SlangTypes" externalIdPrefix="slang."/>
+        <stubIndex implementation="org.slang.idea.stubs.SlangDeclNameIndex"/>
+        <gotoSymbolContributor implementation="org.slang.idea.stubs.SlangGotoSymbolContributor"/>
+
+        <lang.syntaxHighlighterFactory language="Slang"
+                                       implementationClass="org.slang.idea.highlighting.SlangSyntaxHighlighterFactory"/>
+        <annotator language="Slang" implementationClass="org.slang.idea.highlighting.SlangHighlightingAnnotator"/>
+        <colorSettingsPage implementation="org.slang.idea.highlighting.SlangColorSettingsPage"/>
+
+        <lang.braceMatcher language="Slang" implementationClass="org.slang.idea.structure.SlangBraceMatcher"/>
+        <lang.commenter language="Slang" implementationClass="org.slang.idea.structure.SlangCommenter"/>
+        <lang.foldingBuilder language="Slang" implementationClass="org.slang.idea.structure.SlangFoldingBuilder"/>
+        <lang.psiStructureViewFactory language="Slang"
+                                      implementationClass="org.slang.idea.structure.SlangStructureViewFactory"/>
+
+        <additionalLibraryRootsProvider implementation="org.slang.idea.toolchain.SlangLibraryRootProvider"/>
+        <applicationConfigurable parentId="language" id="org.slang.idea.toolchain"
+                                 displayName="Slang"
+                                 instance="org.slang.idea.toolchain.SlangToolchainConfigurable"/>
+
+        <notificationGroup id="Slang" displayType="BALLOON"/>
+    </extensions>
+
+    <applicationListeners>
+        <listener class="org.slang.idea.toolchain.SlangLibraryRootProvider$ToolchainListener"
+                  topic="org.slang.idea.toolchain.SlangToolchain$Listener"/>
+    </applicationListeners>
+</idea-plugin>
