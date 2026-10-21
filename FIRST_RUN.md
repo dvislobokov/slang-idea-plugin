@@ -25,7 +25,7 @@ was written from the documentation only (see the `TODO(verify)` list below).
    platform jars are Java 21 class files; CLAUDE.md said 17, corrected).
 
 2. **Sync**: `tools/sync-slang.sh` → prints
-   `applied tools/grammar-patches/0001-psi-grammar-corpus-fixes.patch` and
+   no `applied tools/grammar-patches/...` line (the corpus fixes are upstream since slang 6e5a456) and
    the corpus size; `git diff src/main/grammar/Slang.bnf` must be empty.
 
 3. **Generate**: `./gradlew generateSlangLexer generateSlangParser`.
@@ -109,10 +109,8 @@ was written from the documentation only (see the `TODO(verify)` list below).
   `>` `>=` (the compiler parser's `expect_gt` does the same for nested
   generic arguments). Inserted semicolons sit right after the token that
   ends the statement, before trailing comments.
-- **Grammar patches.** `tools/grammar-patches/0001-psi-grammar-corpus-fixes.patch`
-  fixes rules of upstream `grammar/slang.bnf` that do not match the
-  compiler (e.g. no `eos` after a top-level `}`); it should be sent
-  upstream as is. The sync script skips it once upstream contains it.
+- **Grammar patches.** None pending: the corpus fixes were merged upstream
+  (slang commit 6e5a456). The mechanism stays for future divergences.
 - **Stubs.** One stub class (`SlangDeclStub`, name only) for `struct`,
   `interface`, `enum`, `func` (incl. methods) and top-level `const`; the
   index holds top-level names only. Bump `SlangStubElementTypes.FILE`'s

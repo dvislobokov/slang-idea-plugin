@@ -1,0 +1,2 @@
+Pending upstream fixes to grammar/slang.bnf, applied by tools/sync-slang.sh.
+Empty when the plugin grammar equals upstream (the normal state).
