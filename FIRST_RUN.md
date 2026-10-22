@@ -98,6 +98,9 @@ was written from the documentation only (see the `TODO(verify)` list below).
 | `lsp/ZellLspServerSupportProvider.kt` (header) | `LspServerSupportProvider.fileOpened(project, file, serverStarter)`, `LspServerStarter.ensureServerStarted`, `ProjectWideLspServerDescriptor(project, name)`, `isSupportedFile`, `createCommandLine` — https://plugins.jetbrains.com/docs/intellij/language-server-protocol.html |
 | `lsp/ZellLspServerSupportProvider.kt` (descriptor) | `lspGoToDefinitionSupport`/`lspHoverSupport` (Boolean) and `lspFormattingSupport` (`LspFormattingSupport.shouldFormatThisFileExclusivelyByServer`) exist as `open val`s in 242 |
 | `lsp/ZellLspServerSupportProvider.kt` (`getLanguageId`) | overridable in 242 |
+| `lsp/ZellLspServerSupportProvider.kt` (`createInitializationOptions`) | `open fun createInitializationOptions(): Any?` in 242; the Gson `JsonObject` reaches zell-lsp as `{"diagnostics":{"mode":"push"},"inlayHints":{...}}` (check the server log: no pull diagnostics registered) |
+| `lsp/ZellLspServerSupportProvider.kt` (`lspCommandsSupport`) | `open val lspCommandsSupport: LspCommandsSupport?` with `executeCommand(server, contextFile, command)` in 242, and the first build that renders LSP code lenses (may be newer than 242; then `zell.runTest`/`zell.debugTest`/`zell.run`/`zell.showReferences` are never invoked there) |
+| `lsp/ZellLspCommands.kt` | `RunContentExecutor(project, handler).withTitle/withActivateToolWindow/run`; arguments arrive as Gson `JsonElement`s |
 | `lsp/ZellLspRestartAction.kt` | `LspServerManager.getInstance(project).stopAndRestartIfNeeded(Class)` |
 
 ## Design notes the first run depends on

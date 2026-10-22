@@ -40,6 +40,7 @@ zell repository; it links `zell` and `zell-lsp` into `~/.local/bin`.
 | 2 | Standard library (`zell env ZELL_STD`) as an external library | toolchain |
 | 2 | Diagnostics, go to definition, references, hover, completion, rename, code actions, semantic tokens, formatting (`zell fmt`) | zell-lsp |
 | 2 | Tools › Restart Zell Language Server | plugin |
+| 2 | Code lens commands: Run test, Debug test (runs with `-v`), Run, N references (`zell.runTest`, `zell.debugTest`, `zell.run`, `zell.showReferences`) | zell-lsp + plugin |
 | 3–5 | Run/test configurations, debugger (DAP), templates, wizard | planned, see CLAUDE.md |
 
 ## Settings
