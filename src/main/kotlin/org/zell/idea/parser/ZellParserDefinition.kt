@@ -1,4 +1,4 @@
-package org.slang.idea.parser
+package org.zell.idea.parser
 
 import com.intellij.lang.ASTNode
 import com.intellij.lang.ParserDefinition
@@ -10,27 +10,27 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
-import org.slang.idea.lang.SlangFile
-import org.slang.idea.lexer.SlangLexer
-import org.slang.idea.psi.SlangTokenSets
-import org.slang.idea.psi.SlangTypes
-import org.slang.idea.stubs.SlangStubElementTypes
+import org.zell.idea.lang.ZellFile
+import org.zell.idea.lexer.ZellLexer
+import org.zell.idea.psi.ZellTokenSets
+import org.zell.idea.psi.ZellTypes
+import org.zell.idea.stubs.ZellStubElementTypes
 
-/** Wires the semicolon-inserting [SlangLexer] and the generated [SlangParser]. */
-class SlangParserDefinition : ParserDefinition {
-    override fun createLexer(project: Project?): Lexer = SlangLexer()
+/** Wires the semicolon-inserting [ZellLexer] and the generated [ZellParser]. */
+class ZellParserDefinition : ParserDefinition {
+    override fun createLexer(project: Project?): Lexer = ZellLexer()
 
-    override fun createParser(project: Project?): PsiParser = SlangParser()
+    override fun createParser(project: Project?): PsiParser = ZellParser()
 
-    override fun getFileNodeType(): IFileElementType = SlangStubElementTypes.FILE
+    override fun getFileNodeType(): IFileElementType = ZellStubElementTypes.FILE
 
-    override fun getWhitespaceTokens(): TokenSet = SlangTokenSets.WHITESPACES
+    override fun getWhitespaceTokens(): TokenSet = ZellTokenSets.WHITESPACES
 
-    override fun getCommentTokens(): TokenSet = SlangTokenSets.COMMENTS
+    override fun getCommentTokens(): TokenSet = ZellTokenSets.COMMENTS
 
-    override fun getStringLiteralElements(): TokenSet = SlangTokenSets.STRINGS
+    override fun getStringLiteralElements(): TokenSet = ZellTokenSets.STRINGS
 
-    override fun createElement(node: ASTNode): PsiElement = SlangTypes.Factory.createElement(node)
+    override fun createElement(node: ASTNode): PsiElement = ZellTypes.Factory.createElement(node)
 
-    override fun createFile(viewProvider: FileViewProvider): PsiFile = SlangFile(viewProvider)
+    override fun createFile(viewProvider: FileViewProvider): PsiFile = ZellFile(viewProvider)
 }

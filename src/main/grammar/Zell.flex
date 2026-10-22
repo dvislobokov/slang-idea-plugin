@@ -1,22 +1,22 @@
-// JFlex lexer for Slang, mirroring compiler/src/lexer.rs + token.rs of the
-// slang repository (token set, literals, nested block comments).
+// JFlex lexer for Zell, mirroring compiler/src/lexer.rs + token.rs of the
+// zell repository (token set, literals, nested block comments).
 //
 // This lexer does NOT insert semicolons: it is used as-is for highlighting
-// (SlangHighlightingLexer). The parser lexer org.slang.idea.lexer.SlangLexer
+// (ZellHighlightingLexer). The parser lexer org.zell.idea.lexer.ZellLexer
 // wraps it and inserts the Go-style automatic semicolons exactly like the
 // compiler (TokenKind::ends_statement, no insertion inside ( ) / [ ]).
 //
-// Generated with `./gradlew generateSlangLexer` into
-// src/main/gen/org/slang/idea/lexer/_SlangLexer.java.
+// Generated with `./gradlew generateZellLexer` into
+// src/main/gen/org/zell/idea/lexer/_ZellLexer.java.
 
-package org.slang.idea.lexer;
+package org.zell.idea.lexer;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import org.slang.idea.psi.SlangTokenTypes;
+import org.zell.idea.psi.ZellTokenTypes;
 
-import static org.slang.idea.psi.SlangTypes.*;
+import static org.zell.idea.psi.ZellTypes.*;
 
 %%
 
@@ -26,13 +26,13 @@ import static org.slang.idea.psi.SlangTypes.*;
   /** Start offset of the block comment being scanned. */
   private int commentStart = 0;
 
-  public _SlangLexer() {
+  public _ZellLexer() {
     this((java.io.Reader) null);
   }
 %}
 
 %public
-%class _SlangLexer
+%class _ZellLexer
 %implements FlexLexer
 %function advance
 %type IElementType
@@ -68,7 +68,7 @@ LINE_COMMENT = "//" [^\n]*
 
 <YYINITIAL> {
   {WHITE_SPACE}      { return TokenType.WHITE_SPACE; }
-  {LINE_COMMENT}     { return SlangTokenTypes.LINE_COMMENT; }
+  {LINE_COMMENT}     { return ZellTokenTypes.LINE_COMMENT; }
   "/*"               { commentDepth = 1; commentStart = getTokenStart(); yybegin(IN_BLOCK_COMMENT); }
 
   // Keywords (token.rs TokenKind::keyword)
@@ -172,7 +172,7 @@ LINE_COMMENT = "//" [^\n]*
                        if (--commentDepth == 0) {
                          yybegin(YYINITIAL);
                          zzStartRead = commentStart;
-                         return SlangTokenTypes.BLOCK_COMMENT;
+                         return ZellTokenTypes.BLOCK_COMMENT;
                        }
                      }
   [^/*]+             { }
@@ -180,6 +180,6 @@ LINE_COMMENT = "//" [^\n]*
   <<EOF>>            {
                        yybegin(YYINITIAL);
                        zzStartRead = commentStart;
-                       return SlangTokenTypes.BLOCK_COMMENT;
+                       return ZellTokenTypes.BLOCK_COMMENT;
                      }
 }

@@ -1,12 +1,12 @@
-package org.slang.idea.psi
+package org.zell.idea.psi
 
 import com.intellij.psi.tree.IElementType
-import org.slang.idea.lang.SlangLanguage
+import org.zell.idea.lang.ZellLanguage
 
-/** Token type of the Slang lexer (`tokenTypeClass` of the grammar). */
-class SlangTokenType(debugName: String) : IElementType(debugName, SlangLanguage) {
-    override fun toString(): String = "SlangTokenType." + super.toString()
+/** Token type of the Zell lexer (`tokenTypeClass` of the grammar). */
+class ZellTokenType(debugName: String) : IElementType(debugName, ZellLanguage) {
+    override fun toString(): String = "ZellTokenType." + super.toString()
 }
 
-/** Composite (non-stub) element type of the Slang PSI (`elementTypeClass` of the grammar). */
-class SlangElementType(debugName: String) : IElementType(debugName, SlangLanguage)
+/** Composite (non-stub) element type of the Zell PSI (`elementTypeClass` of the grammar). */
+class ZellElementType(debugName: String) : IElementType(debugName, ZellLanguage)

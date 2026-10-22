@@ -1,4 +1,4 @@
-package org.slang.idea.toolchain
+package org.zell.idea.toolchain
 
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
@@ -7,21 +7,21 @@ import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.service
 
 /**
- * Toolchain paths set by the user (Settings | Languages & Frameworks | Slang).
- * Empty means "detect" (see [SlangToolchain]).
+ * Toolchain paths set by the user (Settings | Languages & Frameworks | Zell).
+ * Empty means "detect" (see [ZellToolchain]).
  */
 @Service(Service.Level.APP)
-@State(name = "SlangToolchainSettings", storages = [Storage("slang.xml")])
-class SlangToolchainSettings : PersistentStateComponent<SlangToolchainSettings.State> {
+@State(name = "ZellToolchainSettings", storages = [Storage("zell.xml")])
+class ZellToolchainSettings : PersistentStateComponent<ZellToolchainSettings.State> {
     class State {
-        /** Path of the `slang` executable. */
-        var slangPath: String = ""
+        /** Path of the `zell` executable. */
+        var zellPath: String = ""
 
-        /** Path of the `slang-lsp` executable. */
+        /** Path of the `zell-lsp` executable. */
         var lspPath: String = ""
 
-        /** SLANG_HOME (its `std/` is the standard library when `slang env SLANG_STD` is unavailable). */
-        var slangHome: String = ""
+        /** ZELL_HOME (its `std/` is the standard library when `zell env ZELL_STD` is unavailable). */
+        var zellHome: String = ""
     }
 
     private var state = State()
@@ -34,6 +34,6 @@ class SlangToolchainSettings : PersistentStateComponent<SlangToolchainSettings.S
 
     companion object {
         @JvmStatic
-        fun getInstance(): SlangToolchainSettings = service()
+        fun getInstance(): ZellToolchainSettings = service()
     }
 }

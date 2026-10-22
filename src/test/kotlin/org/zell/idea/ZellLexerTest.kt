@@ -1,4 +1,4 @@
-package org.slang.idea
+package org.zell.idea
 
 import com.intellij.lexer.Lexer
 import com.intellij.psi.TokenType
@@ -6,10 +6,10 @@ import com.intellij.psi.tree.IElementType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.slang.idea.lexer.SlangHighlightingLexer
-import org.slang.idea.lexer.SlangLexer
-import org.slang.idea.psi.SlangTokenTypes
-import org.slang.idea.psi.SlangTypes
+import org.zell.idea.lexer.ZellHighlightingLexer
+import org.zell.idea.lexer.ZellLexer
+import org.zell.idea.psi.ZellTokenTypes
+import org.zell.idea.psi.ZellTypes
 import java.io.File
 
 /**
@@ -17,7 +17,7 @@ import java.io.File
  * unit tests of compiler/src/lexer.rs). Plain JUnit: needs the platform jars
  * on the classpath but no IDE application.
  */
-class SlangLexerTest {
+class ZellLexerTest {
 
     // ----- tokens --------------------------------------------------------
 
@@ -96,7 +96,7 @@ class SlangLexerTest {
 
     @Test
     fun highlightingLexerKeepsShiftOperators() {
-        assertEquals("SHR SHREQ", names(SlangHighlightingLexer(), ">> >>=", significantOnly = true))
+        assertEquals("SHR SHREQ", names(ZellHighlightingLexer(), ">> >>=", significantOnly = true))
     }
 
     @Test
@@ -107,14 +107,14 @@ class SlangLexerTest {
         check("a /* /* nested */ */ b", "IDENTIFIER IDENTIFIER SEMI")
         assertEquals(
             "IDENTIFIER WS BLOCK_COMMENT WS IDENTIFIER SEMI",
-            names(SlangLexer(), "a /* /* nested */ */ b", significantOnly = false),
+            names(ZellLexer(), "a /* /* nested */ */ b", significantOnly = false),
         )
     }
 
     @Test
     fun unterminatedBlockCommentRunsToTheEnd() = assertEquals(
         "IDENTIFIER SEMI WS BLOCK_COMMENT",
-        names(SlangLexer(), "a /* never closed", significantOnly = false),
+        names(ZellLexer(), "a /* never closed", significantOnly = false),
     )
 
     // ----- automatic semicolons -------------------------------------------
@@ -168,7 +168,7 @@ class SlangLexerTest {
     fun shiftOperatorsAreSplitForTheParser() {
         check("x >>= 2\ny >> 1\n", "IDENTIFIER GT GE INT_LITERAL SEMI IDENTIFIER GT GT INT_LITERAL SEMI")
         // `>>` at the end of a line ends the statement like `>` (compiler: Shr).
-        val toks = tokens(SlangLexer(), "a>>\n")
+        val toks = tokens(ZellLexer(), "a>>\n")
         assertEquals(listOf(Tok("IDENTIFIER", 0, 1), Tok("GT", 1, 2), Tok("GT", 2, 3), Tok("SEMI", 3, 3), Tok("WS", 3, 4)), toks)
     }
 
@@ -182,7 +182,7 @@ class SlangLexerTest {
     @Test
     fun semicolonSpansAreZeroWidthAfterTheToken() {
         // compiler: spans (0,3) (4,6) (7,8) (9,12) (12,12)
-        val toks = tokens(SlangLexer(), "var xy = \"s\"\n").filter { it.name != "WS" }
+        val toks = tokens(ZellLexer(), "var xy = \"s\"\n").filter { it.name != "WS" }
         assertEquals(
             listOf(Tok("VAR", 0, 3), Tok("IDENTIFIER", 4, 6), Tok("ASSIGN", 7, 8), Tok("STRING_LITERAL", 9, 12), Tok("SEMI", 12, 12)),
             toks,
@@ -195,7 +195,7 @@ class SlangLexerTest {
             Tok("IDENTIFIER", 0, 1), Tok("SEMI", 1, 1), Tok("WS", 1, 2), Tok("LINE_COMMENT", 2, 6),
             Tok("WS", 6, 7), Tok("IDENTIFIER", 7, 8), Tok("SEMI", 8, 8),
         ),
-        tokens(SlangLexer(), "a // c\nb"),
+        tokens(ZellLexer(), "a // c\nb"),
     )
 
     @Test
@@ -206,7 +206,7 @@ class SlangLexerTest {
 
     @Test
     fun helloExample() {
-        val src = File("src/test/testData/lexer/hello.sl").readText()
+        val src = File("src/test/testData/lexer/hello.zl").readText()
         check(
             src,
             "NAMESPACE IDENTIFIER DOT IDENTIFIER SEMI " +
@@ -220,12 +220,12 @@ class SlangLexerTest {
     @Test
     fun tokensCoverTheInput() {
         val samples = listOf(
-            File("src/test/testData/lexer/hello.sl").readText(),
+            File("src/test/testData/lexer/hello.zl").readText(),
             "a /* x\n y */ b // c\n`raw\n` 'c' \"s\" 1.5e3 >>= >> $",
             "func f() int! {\n\treturn 0\n}\n",
         )
         for (src in samples) {
-            for (lexer in listOf(SlangLexer(), SlangHighlightingLexer())) {
+            for (lexer in listOf(ZellLexer(), ZellHighlightingLexer())) {
                 var pos = 0
                 for (t in tokens(lexer, src)) {
                     assertEquals("gap or overlap at ${t.start} in ${lexer.javaClass.simpleName}", pos, t.start)
@@ -242,7 +242,7 @@ class SlangLexerTest {
     private data class Tok(val name: String, val start: Int, val end: Int)
 
     private fun check(src: String, expected: String) =
-        assertEquals("tokens of <$src>", expected, names(SlangLexer(), src, significantOnly = true))
+        assertEquals("tokens of <$src>", expected, names(ZellLexer(), src, significantOnly = true))
 
     private fun names(lexer: Lexer, src: String, significantOnly: Boolean): String =
         tokens(lexer, src)
@@ -250,7 +250,7 @@ class SlangLexerTest {
             .joinToString(" ") { it.name }
 
     private fun texts(src: String): List<String> =
-        tokens(SlangLexer(), src).filter { it.name !in TRIVIA }.map { src.substring(it.start, it.end) }
+        tokens(ZellLexer(), src).filter { it.name !in TRIVIA }.map { src.substring(it.start, it.end) }
 
     private fun tokens(lexer: Lexer, src: String): List<Tok> {
         lexer.start(src, 0, src.length, 0)
@@ -266,17 +266,17 @@ class SlangLexerTest {
     companion object {
         private val TRIVIA = setOf("WS", "LINE_COMMENT", "BLOCK_COMMENT")
 
-        /** Constant name in [SlangTypes] for each token type (identity map). */
+        /** Constant name in [ZellTypes] for each token type (identity map). */
         private val NAMES: Map<IElementType, String> by lazy {
             val m = HashMap<IElementType, String>()
-            for (f in SlangTypes::class.java.fields) {
+            for (f in ZellTypes::class.java.fields) {
                 val v = f.get(null)
                 if (v is IElementType) m[v] = f.name
             }
             m[TokenType.WHITE_SPACE] = "WS"
             m[TokenType.BAD_CHARACTER] = "BAD_CHARACTER"
-            m[SlangTokenTypes.LINE_COMMENT] = "LINE_COMMENT"
-            m[SlangTokenTypes.BLOCK_COMMENT] = "BLOCK_COMMENT"
+            m[ZellTokenTypes.LINE_COMMENT] = "LINE_COMMENT"
+            m[ZellTokenTypes.BLOCK_COMMENT] = "BLOCK_COMMENT"
             m
         }
 

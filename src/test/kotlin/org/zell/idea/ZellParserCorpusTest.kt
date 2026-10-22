@@ -1,15 +1,15 @@
-package org.slang.idea
+package org.zell.idea
 
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.testFramework.ParsingTestCase
-import org.slang.idea.parser.SlangParserDefinition
+import org.zell.idea.parser.ZellParserDefinition
 import java.io.File
 
 /**
  * The mandatory corpus test (CLAUDE.md): the PSI parser must accept every
- * file the compiler accepts. Parses all `.sl` files of examples/, tests/spec/
- * and std/ of the slang checkout in build/slang (tools/sync-slang.sh) and
+ * file the compiler accepts. Parses all `.zl` files of examples/, tests/spec/
+ * and std/ of the zell checkout in build/zell (tools/sync-zell.sh) and
  * fails on any PsiErrorElement.
  *
  * Skipped: files whose first line is a `// error:` directive naming a
@@ -17,20 +17,20 @@ import java.io.File
  * lexically valid; every other compile-fail program is syntactically valid
  * and must parse).
  */
-class SlangParserCorpusTest : ParsingTestCase("", "sl", SlangParserDefinition()) {
+class ZellParserCorpusTest : ParsingTestCase("", "zl", ZellParserDefinition()) {
 
     override fun getTestDataPath(): String = "src/test/testData"
 
     fun testCorpus() {
-        val root = File(System.getProperty("slang.corpus") ?: "build/slang")
-        assertTrue("slang corpus not found at ${root.absolutePath}: run tools/sync-slang.sh", File(root, "examples").isDirectory)
+        val root = File(System.getProperty("zell.corpus") ?: "build/zell")
+        assertTrue("zell corpus not found at ${root.absolutePath}: run tools/sync-zell.sh", File(root, "examples").isDirectory)
 
         val files = listOf("examples", "tests/spec", "std")
             .map { File(root, it) }
             .filter { it.isDirectory }
-            .flatMap { dir -> dir.walkTopDown().filter { it.isFile && it.extension == "sl" }.toList() }
+            .flatMap { dir -> dir.walkTopDown().filter { it.isFile && it.extension == "zl" }.toList() }
             .sortedBy { it.path }
-        assertTrue("no .sl files under ${root.absolutePath}", files.size > 100)
+        assertTrue("no .zl files under ${root.absolutePath}", files.size > 100)
 
         val failures = ArrayList<String>()
         var parsed = 0

@@ -13,7 +13,7 @@ plugins {
     id("org.jetbrains.intellij.platform.settings") version "2.9.0"
 }
 
-rootProject.name = "slang-idea-plugin"
+rootProject.name = "zell-idea-plugin"
 
 dependencyResolutionManagement {
     // FAIL_ON_PROJECT_REPOS also stops the Grammar-Kit plugin from adding its

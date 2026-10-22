@@ -24,11 +24,11 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Sync the slang repository (grammar, corpus)
-        run: tools/sync-slang.sh
+      - name: Sync the zell repository (grammar, corpus)
+        run: tools/sync-zell.sh
 
-      - name: Committed grammar matches the pinned slang commit
-        run: git diff --exit-code src/main/grammar/Slang.bnf
+      - name: Committed grammar matches the pinned zell commit
+        run: git diff --exit-code src/main/grammar/Zell.bnf
 
       - name: Build, test, verify
         run: ./gradlew buildPlugin test verifyPlugin --stacktrace
@@ -41,7 +41,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: slang-idea-plugin
+          name: zell-idea-plugin
           path: build/distributions/*.zip
 
       - uses: actions/upload-artifact@v4

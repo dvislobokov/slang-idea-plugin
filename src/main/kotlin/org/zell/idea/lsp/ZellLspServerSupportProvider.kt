@@ -1,4 +1,4 @@
-package org.slang.idea.lsp
+package org.zell.idea.lsp
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.notification.NotificationGroupManager
@@ -8,14 +8,14 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
 import com.intellij.platform.lsp.api.customization.LspFormattingSupport
-import org.slang.idea.lang.SlangFileType
-import org.slang.idea.toolchain.SlangToolchain
+import org.zell.idea.lang.ZellFileType
+import org.zell.idea.toolchain.ZellToolchain
 import java.util.concurrent.atomic.AtomicBoolean
 
 /*
- * Hosting of slang-lsp through the platform LSP API (com.intellij.platform.lsp),
+ * Hosting of zell-lsp through the platform LSP API (com.intellij.platform.lsp),
  * the way the Go plugin hosts gopls. Loaded only in IDEs with
- * com.intellij.modules.ultimate (META-INF/slang-lsp.xml).
+ * com.intellij.modules.ultimate (META-INF/zell-lsp.xml).
  *
  * TODO(verify): every LSP API member used here against
  * https://plugins.jetbrains.com/docs/intellij/language-server-protocol.html
@@ -23,25 +23,25 @@ import java.util.concurrent.atomic.AtomicBoolean
  * written from the documentation, not compiled here.
  */
 
-/** Starts one slang-lsp per project when a `.sl` file is opened. */
-class SlangLspServerSupportProvider : LspServerSupportProvider {
+/** Starts one zell-lsp per project when a `.zl` file is opened. */
+class ZellLspServerSupportProvider : LspServerSupportProvider {
     override fun fileOpened(project: Project, file: VirtualFile, serverStarter: LspServerSupportProvider.LspServerStarter) {
-        if (!isSlangFile(file)) return
-        if (SlangToolchain.lspCommandLine() == null) {
+        if (!isZellFile(file)) return
+        if (ZellToolchain.lspCommandLine() == null) {
             notifyMissingToolchain(project)
             return
         }
-        serverStarter.ensureServerStarted(SlangLspServerDescriptor(project))
+        serverStarter.ensureServerStarted(ZellLspServerDescriptor(project))
     }
 
     private fun notifyMissingToolchain(project: Project) {
         if (!warned.compareAndSet(false, true)) return
         NotificationGroupManager.getInstance()
-            .getNotificationGroup("Slang")
+            .getNotificationGroup("Zell")
             .createNotification(
-                "Slang language server not found",
-                "Install the toolchain (scripts/install.sh from the slang repository) or set the paths in " +
-                    "Settings | Languages &amp; Frameworks | Slang. Highlighting and structure work without it.",
+                "Zell language server not found",
+                "Install the toolchain (scripts/install.sh from the zell repository) or set the paths in " +
+                    "Settings | Languages &amp; Frameworks | Zell. Highlighting and structure work without it.",
                 NotificationType.WARNING,
             )
             .notify(project)
@@ -52,25 +52,25 @@ class SlangLspServerSupportProvider : LspServerSupportProvider {
     }
 }
 
-internal fun isSlangFile(file: VirtualFile): Boolean = file.fileType == SlangFileType
+internal fun isZellFile(file: VirtualFile): Boolean = file.fileType == ZellFileType
 
 /**
- * slang-lsp over stdio. Its capabilities (lsp/src/lib.rs `capabilities()`):
+ * zell-lsp over stdio. Its capabilities (lsp/src/lib.rs `capabilities()`):
  * hover, completion (`.`), signature help, inlay hints, code actions,
  * formatting (document and range), workspace/document symbols, document
  * highlight, definition, references, rename with prepare, folding ranges,
  * semantic tokens. The platform enables the features it supports by default;
  * the overrides below only state the choices.
  */
-class SlangLspServerDescriptor(project: Project) : ProjectWideLspServerDescriptor(project, "Slang") {
-    override fun isSupportedFile(file: VirtualFile): Boolean = isSlangFile(file)
+class ZellLspServerDescriptor(project: Project) : ProjectWideLspServerDescriptor(project, "Zell") {
+    override fun isSupportedFile(file: VirtualFile): Boolean = isZellFile(file)
 
     override fun createCommandLine(): GeneralCommandLine =
-        (SlangToolchain.lspCommandLine() ?: error("slang-lsp not found"))
+        (ZellToolchain.lspCommandLine() ?: error("zell-lsp not found"))
             .withWorkDirectory(project.basePath)
 
-    /** `slang` is the language id slang-lsp expects (editors/vscode uses it too). TODO(verify): overridable in 242. */
-    override fun getLanguageId(file: VirtualFile): String = "slang"
+    /** `zell` is the language id zell-lsp expects (editors/vscode uses it too). TODO(verify): overridable in 242. */
+    override fun getLanguageId(file: VirtualFile): String = "zell"
 
     // TODO(verify): in 2024.2 these are `open val`s of LspServerDescriptor with
     // these types; 2025.1 moved them to `lspCustomization`. Defaults are all on.
@@ -78,12 +78,12 @@ class SlangLspServerDescriptor(project: Project) : ProjectWideLspServerDescripto
 
     override val lspHoverSupport: Boolean = true
 
-    /** `slang fmt` through textDocument/formatting is the only Slang formatter. */
+    /** `zell fmt` through textDocument/formatting is the only Zell formatter. */
     override val lspFormattingSupport: LspFormattingSupport = object : LspFormattingSupport() {
         override fun shouldFormatThisFileExclusivelyByServer(
             file: VirtualFile,
             ideCanFormatThisFileItself: Boolean,
             serverExplicitlyWantsToFormatThisFile: Boolean,
-        ): Boolean = isSlangFile(file)
+        ): Boolean = isZellFile(file)
     }
 }

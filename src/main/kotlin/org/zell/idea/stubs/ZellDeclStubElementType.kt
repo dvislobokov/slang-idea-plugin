@@ -1,4 +1,4 @@
-package org.slang.idea.stubs
+package org.zell.idea.stubs
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
@@ -8,57 +8,57 @@ import com.intellij.psi.stubs.PsiFileStub
 import com.intellij.psi.stubs.StubElement
 import com.intellij.psi.stubs.StubInputStream
 import com.intellij.psi.stubs.StubOutputStream
-import org.slang.idea.lang.SlangLanguage
-import org.slang.idea.psi.SlangNamedElement
-import org.slang.idea.psi.SlangTypes
-import org.slang.idea.psi.impl.SlangConstDeclImpl
-import org.slang.idea.psi.impl.SlangEnumDeclImpl
-import org.slang.idea.psi.impl.SlangFuncDeclImpl
-import org.slang.idea.psi.impl.SlangInterfaceDeclImpl
-import org.slang.idea.psi.impl.SlangStructDeclImpl
+import org.zell.idea.lang.ZellLanguage
+import org.zell.idea.psi.ZellNamedElement
+import org.zell.idea.psi.ZellTypes
+import org.zell.idea.psi.impl.ZellConstDeclImpl
+import org.zell.idea.psi.impl.ZellEnumDeclImpl
+import org.zell.idea.psi.impl.ZellFuncDeclImpl
+import org.zell.idea.psi.impl.ZellInterfaceDeclImpl
+import org.zell.idea.psi.impl.ZellStructDeclImpl
 
 /**
  * Stub element type of the declaration rules. [debugName] equals the
- * constant name in the generated [SlangTypes] (`STRUCT_DECL`, ...), and the
- * external id is `slang.` + debugName, as `stubElementTypeHolder` with
- * `externalIdPrefix="slang."` requires (plugin.xml).
+ * constant name in the generated [ZellTypes] (`STRUCT_DECL`, ...), and the
+ * external id is `zell.` + debugName, as `stubElementTypeHolder` with
+ * `externalIdPrefix="zell."` requires (plugin.xml).
  */
-class SlangDeclStubElementType(debugName: String) :
-    IStubElementType<SlangDeclStub, SlangNamedElement>(debugName, SlangLanguage) {
+class ZellDeclStubElementType(debugName: String) :
+    IStubElementType<ZellDeclStub, ZellNamedElement>(debugName, ZellLanguage) {
 
-    override fun getExternalId(): String = "slang.$debugName"
+    override fun getExternalId(): String = "zell.$debugName"
 
     // TODO(verify): the generated class names (Grammar-Kit: psiClassPrefix + rule name in
     // CamelCase + psiImplClassSuffix) and their (stub, IStubElementType) constructors,
-    // after `./gradlew generateSlangParser` (src/main/gen/org/slang/idea/psi/impl).
-    override fun createPsi(stub: SlangDeclStub): SlangNamedElement = when (debugName) {
-        "STRUCT_DECL" -> SlangStructDeclImpl(stub, this)
-        "INTERFACE_DECL" -> SlangInterfaceDeclImpl(stub, this)
-        "ENUM_DECL" -> SlangEnumDeclImpl(stub, this)
-        "FUNC_DECL" -> SlangFuncDeclImpl(stub, this)
-        "CONST_DECL" -> SlangConstDeclImpl(stub, this)
+    // after `./gradlew generateZellParser` (src/main/gen/org/zell/idea/psi/impl).
+    override fun createPsi(stub: ZellDeclStub): ZellNamedElement = when (debugName) {
+        "STRUCT_DECL" -> ZellStructDeclImpl(stub, this)
+        "INTERFACE_DECL" -> ZellInterfaceDeclImpl(stub, this)
+        "ENUM_DECL" -> ZellEnumDeclImpl(stub, this)
+        "FUNC_DECL" -> ZellFuncDeclImpl(stub, this)
+        "CONST_DECL" -> ZellConstDeclImpl(stub, this)
         else -> error("unexpected stub element type $debugName")
     }
 
-    override fun createStub(psi: SlangNamedElement, parentStub: StubElement<out PsiElement>?): SlangDeclStub =
-        SlangDeclStub(parentStub, this, psi.name)
+    override fun createStub(psi: ZellNamedElement, parentStub: StubElement<out PsiElement>?): ZellDeclStub =
+        ZellDeclStub(parentStub, this, psi.name)
 
     /** Local `const` declarations inside function bodies get no stub. */
     override fun shouldCreateStub(node: ASTNode): Boolean =
-        node.elementType != SlangTypes.CONST_DECL || node.treeParent?.elementType == SlangTypes.TOP_LEVEL_DECL
+        node.elementType != ZellTypes.CONST_DECL || node.treeParent?.elementType == ZellTypes.TOP_LEVEL_DECL
 
-    override fun serialize(stub: SlangDeclStub, dataStream: StubOutputStream) {
+    override fun serialize(stub: ZellDeclStub, dataStream: StubOutputStream) {
         dataStream.writeName(stub.name)
     }
 
-    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): SlangDeclStub =
-        SlangDeclStub(parentStub, this, dataStream.readNameString())
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): ZellDeclStub =
+        ZellDeclStub(parentStub, this, dataStream.readNameString())
 
     /** Only top-level declarations are indexed (methods have the struct's stub as parent). */
-    override fun indexStub(stub: SlangDeclStub, sink: IndexSink) {
+    override fun indexStub(stub: ZellDeclStub, sink: IndexSink) {
         val name = stub.name ?: return
         if (stub.parentStub is PsiFileStub<*>) {
-            sink.occurrence(SlangDeclNameIndex.KEY, name)
+            sink.occurrence(ZellDeclNameIndex.KEY, name)
         }
     }
 }

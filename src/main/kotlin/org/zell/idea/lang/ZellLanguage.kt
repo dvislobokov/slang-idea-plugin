@@ -1,12 +1,12 @@
-package org.slang.idea.lang
+package org.zell.idea.lang
 
 import com.intellij.lang.Language
 
-/** The Slang language (`.sl` files). */
-object SlangLanguage : Language("Slang") {
-    private fun readResolve(): Any = SlangLanguage
+/** The Zell language (`.zl` files). */
+object ZellLanguage : Language("Zell") {
+    private fun readResolve(): Any = ZellLanguage
 
-    override fun getDisplayName(): String = "Slang"
+    override fun getDisplayName(): String = "Zell"
 
     override fun isCaseSensitive(): Boolean = true
 }

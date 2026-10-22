@@ -1,4 +1,4 @@
-package org.slang.idea.structure
+package org.zell.idea.structure
 
 import com.intellij.icons.AllIcons
 import com.intellij.ide.structureView.StructureViewBuilder
@@ -13,82 +13,82 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
-import org.slang.idea.lang.SlangFile
-import org.slang.idea.lang.SlangIcons
-import org.slang.idea.psi.SlangTypes
-import org.slang.idea.psi.impl.SlangDeclMixin
+import org.zell.idea.lang.ZellFile
+import org.zell.idea.lang.ZellIcons
+import org.zell.idea.psi.ZellTypes
+import org.zell.idea.psi.impl.ZellDeclMixin
 import javax.swing.Icon
 
 /**
  * Structure view: the file node shows the namespace; below it the top-level
  * declarations; structs list fields, embeds and methods, interfaces their
  * methods and embeds, enums their variants and methods. Built from the PSI
- * only (names match slang-lsp document symbols, which use the same syntax).
+ * only (names match zell-lsp document symbols, which use the same syntax).
  */
-class SlangStructureViewFactory : PsiStructureViewFactory {
+class ZellStructureViewFactory : PsiStructureViewFactory {
     override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder? {
-        if (psiFile !is SlangFile) return null
+        if (psiFile !is ZellFile) return null
         return object : TreeBasedStructureViewBuilder() {
-            override fun createStructureViewModel(editor: Editor?): StructureViewModel = SlangStructureViewModel(psiFile, editor)
+            override fun createStructureViewModel(editor: Editor?): StructureViewModel = ZellStructureViewModel(psiFile, editor)
         }
     }
 }
 
-class SlangStructureViewModel(file: SlangFile, editor: Editor?) :
-    StructureViewModelBase(file, editor, SlangStructureViewElement(file)),
+class ZellStructureViewModel(file: ZellFile, editor: Editor?) :
+    StructureViewModelBase(file, editor, ZellStructureViewElement(file)),
     StructureViewModel.ElementInfoProvider {
 
     init {
-        withSuitableClasses(SlangDeclMixin::class.java)
+        withSuitableClasses(ZellDeclMixin::class.java)
     }
 
     override fun isAlwaysShowsPlus(element: StructureViewTreeElement): Boolean = false
 
     override fun isAlwaysLeaf(element: StructureViewTreeElement): Boolean {
-        val e = element as? SlangStructureViewElement ?: return false
-        return e.element !is SlangFile && e.node?.elementType !in CONTAINERS
+        val e = element as? ZellStructureViewElement ?: return false
+        return e.element !is ZellFile && e.node?.elementType !in CONTAINERS
     }
 
     private companion object {
-        val CONTAINERS = setOf(SlangTypes.STRUCT_DECL, SlangTypes.INTERFACE_DECL, SlangTypes.ENUM_DECL)
+        val CONTAINERS = setOf(ZellTypes.STRUCT_DECL, ZellTypes.INTERFACE_DECL, ZellTypes.ENUM_DECL)
     }
 }
 
 /** A structure node over a PSI element; what it shows depends on the grammar rule. */
-class SlangStructureViewElement(element: PsiElement) : PsiTreeElementBase<PsiElement>(element) {
+class ZellStructureViewElement(element: PsiElement) : PsiTreeElementBase<PsiElement>(element) {
     val node: ASTNode?
         get() = element?.node
 
     override fun getPresentableText(): String? {
         val element = element ?: return null
-        if (element is SlangFile) return element.namespaceName?.let { "namespace $it" } ?: element.name
+        if (element is ZellFile) return element.namespaceName?.let { "namespace $it" } ?: element.name
         val node = element.node
         return when (node.elementType) {
-            SlangTypes.FUNC_DECL -> node.findChildByType(SlangTypes.FUNC_SIGNATURE)?.let(::signature)
-            SlangTypes.FUNC_SIGNATURE -> signature(node)
-            SlangTypes.EXTERN_FUNC_DECL -> node.findChildByType(SlangTypes.FUNC_SIGNATURE)?.let(::signature)
-            SlangTypes.FIELD_DECL, SlangTypes.VAR_DECL -> compact(node.text.substringBefore('=').removePrefix("var "))
-            SlangTypes.EMBED_DECL, SlangTypes.NAMED_TYPE -> compact(node.text)
-            SlangTypes.ENUM_VARIANT -> node.findChildByType(SlangTypes.IDENTIFIER)?.let { v ->
-                val params = node.findChildByType(SlangTypes.PARAM_LIST)
+            ZellTypes.FUNC_DECL -> node.findChildByType(ZellTypes.FUNC_SIGNATURE)?.let(::signature)
+            ZellTypes.FUNC_SIGNATURE -> signature(node)
+            ZellTypes.EXTERN_FUNC_DECL -> node.findChildByType(ZellTypes.FUNC_SIGNATURE)?.let(::signature)
+            ZellTypes.FIELD_DECL, ZellTypes.VAR_DECL -> compact(node.text.substringBefore('=').removePrefix("var "))
+            ZellTypes.EMBED_DECL, ZellTypes.NAMED_TYPE -> compact(node.text)
+            ZellTypes.ENUM_VARIANT -> node.findChildByType(ZellTypes.IDENTIFIER)?.let { v ->
+                val params = node.findChildByType(ZellTypes.PARAM_LIST)
                 if (params != null) "${v.text}(${compact(params.text)})" else v.text
             }
-            else -> (element as? SlangDeclMixin)?.name
+            else -> (element as? ZellDeclMixin)?.name
         }
     }
 
     override fun getIcon(open: Boolean): Icon? {
         val element = element ?: return null
-        if (element is SlangFile) return SlangIcons.FILE
+        if (element is ZellFile) return ZellIcons.FILE
         return when (element.node.elementType) {
-            SlangTypes.FIELD_DECL -> AllIcons.Nodes.Field
-            SlangTypes.EMBED_DECL, SlangTypes.NAMED_TYPE -> AllIcons.Nodes.Interface
-            SlangTypes.ENUM_VARIANT -> AllIcons.Nodes.Field
-            SlangTypes.VAR_DECL -> AllIcons.Nodes.Variable
-            SlangTypes.FUNC_SIGNATURE, SlangTypes.EXTERN_FUNC_DECL -> AllIcons.Nodes.Method
-            SlangTypes.FUNC_DECL ->
-                if (element.node.treeParent?.elementType == SlangTypes.TOP_LEVEL_DECL) AllIcons.Nodes.Function else AllIcons.Nodes.Method
-            else -> (element as? SlangDeclMixin)?.kind?.icon
+            ZellTypes.FIELD_DECL -> AllIcons.Nodes.Field
+            ZellTypes.EMBED_DECL, ZellTypes.NAMED_TYPE -> AllIcons.Nodes.Interface
+            ZellTypes.ENUM_VARIANT -> AllIcons.Nodes.Field
+            ZellTypes.VAR_DECL -> AllIcons.Nodes.Variable
+            ZellTypes.FUNC_SIGNATURE, ZellTypes.EXTERN_FUNC_DECL -> AllIcons.Nodes.Method
+            ZellTypes.FUNC_DECL ->
+                if (element.node.treeParent?.elementType == ZellTypes.TOP_LEVEL_DECL) AllIcons.Nodes.Function else AllIcons.Nodes.Method
+            else -> (element as? ZellDeclMixin)?.kind?.icon
         }
     }
 
@@ -97,41 +97,41 @@ class SlangStructureViewElement(element: PsiElement) : PsiTreeElementBase<PsiEle
         val node = element.node
         val children = ArrayList<PsiElement>()
         when {
-            element is SlangFile -> for (top in node.getChildren(null)) {
-                if (top.elementType != SlangTypes.TOP_LEVEL_DECL) continue
+            element is ZellFile -> for (top in node.getChildren(null)) {
+                if (top.elementType != ZellTypes.TOP_LEVEL_DECL) continue
                 top.getChildren(null).firstOrNull { it.elementType in TOP_LEVEL }?.psi?.let(children::add)
             }
-            node.elementType == SlangTypes.STRUCT_DECL -> for (member in node.getChildren(null)) {
-                if (member.elementType != SlangTypes.STRUCT_MEMBER) continue
+            node.elementType == ZellTypes.STRUCT_DECL -> for (member in node.getChildren(null)) {
+                if (member.elementType != ZellTypes.STRUCT_MEMBER) continue
                 val m = member.getChildren(null).firstOrNull { it.elementType in MEMBERS } ?: continue
                 // method_decl ::= STATIC? func_decl
-                val target = if (m.elementType == SlangTypes.METHOD_DECL) m.findChildByType(SlangTypes.FUNC_DECL) else m
+                val target = if (m.elementType == ZellTypes.METHOD_DECL) m.findChildByType(ZellTypes.FUNC_DECL) else m
                 target?.psi?.let(children::add)
             }
-            node.elementType == SlangTypes.INTERFACE_DECL -> for (c in node.getChildren(null)) {
-                if (c.elementType == SlangTypes.FUNC_SIGNATURE || c.elementType == SlangTypes.NAMED_TYPE) children.add(c.psi)
+            node.elementType == ZellTypes.INTERFACE_DECL -> for (c in node.getChildren(null)) {
+                if (c.elementType == ZellTypes.FUNC_SIGNATURE || c.elementType == ZellTypes.NAMED_TYPE) children.add(c.psi)
             }
-            node.elementType == SlangTypes.ENUM_DECL -> for (c in node.getChildren(null)) {
+            node.elementType == ZellTypes.ENUM_DECL -> for (c in node.getChildren(null)) {
                 when (c.elementType) {
-                    SlangTypes.ENUM_VARIANT -> children.add(c.psi)
-                    SlangTypes.METHOD_DECL -> c.findChildByType(SlangTypes.FUNC_DECL)?.psi?.let(children::add)
-                    SlangTypes.FUNC_DECL -> children.add(c.psi)
+                    ZellTypes.ENUM_VARIANT -> children.add(c.psi)
+                    ZellTypes.METHOD_DECL -> c.findChildByType(ZellTypes.FUNC_DECL)?.psi?.let(children::add)
+                    ZellTypes.FUNC_DECL -> children.add(c.psi)
                 }
             }
         }
-        return children.map(::SlangStructureViewElement)
+        return children.map(::ZellStructureViewElement)
     }
 
     private companion object {
         val TOP_LEVEL: Set<IElementType> = setOf(
-            SlangTypes.STRUCT_DECL, SlangTypes.INTERFACE_DECL, SlangTypes.ENUM_DECL, SlangTypes.FUNC_DECL,
-            SlangTypes.EXTERN_FUNC_DECL, SlangTypes.VAR_DECL, SlangTypes.CONST_DECL,
+            ZellTypes.STRUCT_DECL, ZellTypes.INTERFACE_DECL, ZellTypes.ENUM_DECL, ZellTypes.FUNC_DECL,
+            ZellTypes.EXTERN_FUNC_DECL, ZellTypes.VAR_DECL, ZellTypes.CONST_DECL,
         )
-        val MEMBERS: Set<IElementType> = setOf(SlangTypes.METHOD_DECL, SlangTypes.FIELD_DECL, SlangTypes.EMBED_DECL)
+        val MEMBERS: Set<IElementType> = setOf(ZellTypes.METHOD_DECL, ZellTypes.FIELD_DECL, ZellTypes.EMBED_DECL)
 
         /** `Area() float` for `func Area() float` (the signature without `async func`). */
         fun signature(sig: ASTNode): String {
-            val name = sig.findChildByType(SlangTypes.IDENTIFIER) ?: return compact(sig.text)
+            val name = sig.findChildByType(ZellTypes.IDENTIFIER) ?: return compact(sig.text)
             val text = sig.text.substring(name.startOffset - sig.startOffset)
             return compact(text)
         }

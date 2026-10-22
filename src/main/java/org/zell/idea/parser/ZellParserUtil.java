@@ -1,28 +1,28 @@
-package org.slang.idea.parser;
+package org.zell.idea.parser;
 
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.parser.GeneratedParserUtilBase;
 import com.intellij.psi.tree.IElementType;
 
-import static org.slang.idea.psi.SlangTypes.*;
+import static org.zell.idea.psi.ZellTypes.*;
 
 /**
- * Parser utilities for the generated {@code SlangParser} ({@code parserUtilClass}
- * in the grammar header, a plugin-specific line added by tools/sync-slang.sh).
+ * Parser utilities for the generated {@code ZellParser} ({@code parserUtilClass}
+ * in the grammar header, a plugin-specific line added by tools/sync-zell.sh).
  *
- * <p>The parser lexer ({@link org.slang.idea.lexer.SlangLexer}) splits {@code >>}
+ * <p>The parser lexer ({@link org.zell.idea.lexer.ZellLexer}) splits {@code >>}
  * into two adjacent {@code GT} tokens and {@code >>=} into {@code GT GE}, so that
  * {@code generic_args} can close nested arguments ({@code List<List<int>>}), as
  * the compiler's {@code expect_gt} does. Where the grammar asks for {@code SHR}
  * or {@code SHREQ}, the static methods below (which hide the ones of
  * {@link GeneratedParserUtilBase} for the generated code, since it imports
- * {@code SlangParserUtil.*}) accept such an adjacent pair and collapse it into a
+ * {@code ZellParserUtil.*}) accept such an adjacent pair and collapse it into a
  * single {@code SHR}/{@code SHREQ} leaf.
  *
  * <p>Written in Java on purpose: the generated parser relies on static-method
  * hiding, which Kotlin cannot express.
  */
-public class SlangParserUtil extends GeneratedParserUtilBase {
+public class ZellParserUtil extends GeneratedParserUtilBase {
 
   /** Whether the current tokens are an adjacent {@code > >} / {@code > >=} pair forming {@code token}. */
   static boolean atComposite(PsiBuilder b, IElementType token) {

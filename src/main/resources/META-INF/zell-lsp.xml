@@ -1,17 +1,17 @@
 <!-- Loaded only when com.intellij.modules.ultimate is present (the platform LSP API). -->
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
-        <platform.lsp.serverSupportProvider implementation="org.slang.idea.lsp.SlangLspServerSupportProvider"/>
+        <platform.lsp.serverSupportProvider implementation="org.zell.idea.lsp.ZellLspServerSupportProvider"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="org.slang.idea.lsp.SlangLspRestartAction$ToolchainListener"
-                  topic="org.slang.idea.toolchain.SlangToolchain$Listener"/>
+        <listener class="org.zell.idea.lsp.ZellLspRestartAction$ToolchainListener"
+                  topic="org.zell.idea.toolchain.ZellToolchain$Listener"/>
     </applicationListeners>
 
     <actions>
-        <action id="org.slang.idea.lsp.Restart" class="org.slang.idea.lsp.SlangLspRestartAction"
-                text="Restart Slang Language Server" description="Stop slang-lsp and start it again">
+        <action id="org.zell.idea.lsp.Restart" class="org.zell.idea.lsp.ZellLspRestartAction"
+                text="Restart Zell Language Server" description="Stop zell-lsp and start it again">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
     </actions>

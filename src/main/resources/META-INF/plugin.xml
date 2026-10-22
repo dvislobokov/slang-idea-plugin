@@ -1,16 +1,16 @@
-<!-- Slang language support. Grammar-Kit PSI for syntax; slang-lsp (platform LSP API) for semantics. -->
+<!-- Zell language support. Grammar-Kit PSI for syntax; zell-lsp (platform LSP API) for semantics. -->
 <idea-plugin>
-    <id>org.slang.idea</id>
-    <name>Slang</name>
-    <vendor url="https://github.com/dvislobokov/slang">Slang</vendor>
+    <id>org.zell.idea</id>
+    <name>Zell</name>
+    <vendor url="https://github.com/zell-lang/zell">Zell</vendor>
 
     <description><![CDATA[
-    Support for the <a href="https://github.com/dvislobokov/slang">Slang</a> programming language.
+    Support for the <a href="https://github.com/zell-lang/zell">Zell</a> programming language.
     <ul>
-      <li>Syntax highlighting, brace matching, commenting, folding, structure view and Go to Symbol for <code>.sl</code> files</li>
-      <li>The standard library (<code>slang env SLANG_STD</code>) attached as an external library</li>
+      <li>Syntax highlighting, brace matching, commenting, folding, structure view and Go to Symbol for <code>.zl</code> files</li>
+      <li>The standard library (<code>zell env ZELL_STD</code>) attached as an external library</li>
       <li>In IntelliJ IDEA Ultimate, GoLand and other commercial IDEs: diagnostics, navigation, hover, completion,
-          rename, code actions, semantic highlighting and formatting from the <code>slang-lsp</code> language server</li>
+          rename, code actions, semantic highlighting and formatting from the <code>zell-lsp</code> language server</li>
     </ul>
     ]]></description>
 
@@ -20,40 +20,40 @@
     <depends>com.intellij.modules.lang</depends>
     <!-- The platform LSP API exists only in commercial IDEs; without it the plugin
          still loads (PSI features only). -->
-    <depends optional="true" config-file="slang-lsp.xml">com.intellij.modules.ultimate</depends>
+    <depends optional="true" config-file="zell-lsp.xml">com.intellij.modules.ultimate</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="Slang" language="Slang" extensions="sl"
-                  implementationClass="org.slang.idea.lang.SlangFileType" fieldName="INSTANCE"/>
-        <lang.parserDefinition language="Slang" implementationClass="org.slang.idea.parser.SlangParserDefinition"/>
+        <fileType name="Zell" language="Zell" extensions="zl"
+                  implementationClass="org.zell.idea.lang.ZellFileType" fieldName="INSTANCE"/>
+        <lang.parserDefinition language="Zell" implementationClass="org.zell.idea.parser.ZellParserDefinition"/>
 
-        <!-- Stub element types are fields of the generated interface SlangTypes; their
-             external ids are "slang." + field name (SlangDeclStubElementType). -->
-        <stubElementTypeHolder class="org.slang.idea.psi.SlangTypes" externalIdPrefix="slang."/>
-        <stubIndex implementation="org.slang.idea.stubs.SlangDeclNameIndex"/>
-        <gotoSymbolContributor implementation="org.slang.idea.stubs.SlangGotoSymbolContributor"/>
+        <!-- Stub element types are fields of the generated interface ZellTypes; their
+             external ids are "zell." + field name (ZellDeclStubElementType). -->
+        <stubElementTypeHolder class="org.zell.idea.psi.ZellTypes" externalIdPrefix="zell."/>
+        <stubIndex implementation="org.zell.idea.stubs.ZellDeclNameIndex"/>
+        <gotoSymbolContributor implementation="org.zell.idea.stubs.ZellGotoSymbolContributor"/>
 
-        <lang.syntaxHighlighterFactory language="Slang"
-                                       implementationClass="org.slang.idea.highlighting.SlangSyntaxHighlighterFactory"/>
-        <annotator language="Slang" implementationClass="org.slang.idea.highlighting.SlangHighlightingAnnotator"/>
-        <colorSettingsPage implementation="org.slang.idea.highlighting.SlangColorSettingsPage"/>
+        <lang.syntaxHighlighterFactory language="Zell"
+                                       implementationClass="org.zell.idea.highlighting.ZellSyntaxHighlighterFactory"/>
+        <annotator language="Zell" implementationClass="org.zell.idea.highlighting.ZellHighlightingAnnotator"/>
+        <colorSettingsPage implementation="org.zell.idea.highlighting.ZellColorSettingsPage"/>
 
-        <lang.braceMatcher language="Slang" implementationClass="org.slang.idea.structure.SlangBraceMatcher"/>
-        <lang.commenter language="Slang" implementationClass="org.slang.idea.structure.SlangCommenter"/>
-        <lang.foldingBuilder language="Slang" implementationClass="org.slang.idea.structure.SlangFoldingBuilder"/>
-        <lang.psiStructureViewFactory language="Slang"
-                                      implementationClass="org.slang.idea.structure.SlangStructureViewFactory"/>
+        <lang.braceMatcher language="Zell" implementationClass="org.zell.idea.structure.ZellBraceMatcher"/>
+        <lang.commenter language="Zell" implementationClass="org.zell.idea.structure.ZellCommenter"/>
+        <lang.foldingBuilder language="Zell" implementationClass="org.zell.idea.structure.ZellFoldingBuilder"/>
+        <lang.psiStructureViewFactory language="Zell"
+                                      implementationClass="org.zell.idea.structure.ZellStructureViewFactory"/>
 
-        <additionalLibraryRootsProvider implementation="org.slang.idea.toolchain.SlangLibraryRootProvider"/>
-        <applicationConfigurable parentId="language" id="org.slang.idea.toolchain"
-                                 displayName="Slang"
-                                 instance="org.slang.idea.toolchain.SlangToolchainConfigurable"/>
+        <additionalLibraryRootsProvider implementation="org.zell.idea.toolchain.ZellLibraryRootProvider"/>
+        <applicationConfigurable parentId="language" id="org.zell.idea.toolchain"
+                                 displayName="Zell"
+                                 instance="org.zell.idea.toolchain.ZellToolchainConfigurable"/>
 
-        <notificationGroup id="Slang" displayType="BALLOON"/>
+        <notificationGroup id="Zell" displayType="BALLOON"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="org.slang.idea.toolchain.SlangLibraryRootProvider$ToolchainListener"
-                  topic="org.slang.idea.toolchain.SlangToolchain$Listener"/>
+        <listener class="org.zell.idea.toolchain.ZellLibraryRootProvider$ToolchainListener"
+                  topic="org.zell.idea.toolchain.ZellToolchain$Listener"/>
     </applicationListeners>
 </idea-plugin>

@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# Fetches the slang repository at the commit pinned in gradle.properties
-# (`slangCommit`) into build/slang, and derives the plugin grammar from it:
+# Fetches the zell repository at the commit pinned in gradle.properties
+# (`zellCommit`) into build/zell, and derives the plugin grammar from it:
 #
-#   build/slang/                      checkout (grammar, std/, examples/, tests/spec/ for the corpus test)
-#   src/main/grammar/Slang.bnf        grammar/slang.bnf with the plugin header (see below); committed
+#   build/zell/                       checkout (grammar, std/, examples/, tests/spec/ for the corpus test)
+#   src/main/grammar/Zell.bnf         grammar/zell.bnf with the plugin header (see below); committed
 #
 # Usage:
-#   tools/sync-slang.sh                 # clone from slangRepo (GitHub) at slangCommit
-#   SLANG_REPO=/path/to/slang tools/sync-slang.sh   # use a local clone as the source
-#   SLANG_COMMIT=<sha> tools/sync-slang.sh          # try another commit (does not edit gradle.properties)
+#   tools/sync-zell.sh                          # clone from zellRepo (GitHub) at zellCommit
+#   ZELL_REPO=/path/to/zell tools/sync-zell.sh  # use a local clone (path or URL) instead of zellRepo
+#   ZELL_COMMIT=<sha> tools/sync-zell.sh        # try another commit (does not edit gradle.properties)
 #
 # The upstream grammar is the source of truth. This script changes:
-#  - the Grammar-Kit header: the generated packages (org.slang.lang ->
-#    org.slang.idea) and a block of plugin-specific attributes (parser util,
+#  - the Grammar-Kit header: the generated packages (org.zell.lang ->
+#    org.zell.idea) and a block of plugin-specific attributes (parser util,
 #    named-element mixins, stubs) between the "plugin-specific" markers;
 #  - rule bodies ONLY through the patches in tools/grammar-patches/*.patch
-#    (unified diffs against upstream grammar/slang.bnf, each one meant to be
+#    (unified diffs against upstream grammar/zell.bnf, each one meant to be
 #    upstreamed as is). A patch that is already contained in the pinned commit
 #    is skipped; one that applies neither way stops the sync. Delete a patch
 #    once upstream has it.
@@ -24,20 +24,20 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 prop() { sed -n "s/^$1=//p" "$root/gradle.properties" | tail -n 1; }
 
-repo="${SLANG_REPO:-$(prop slangRepo)}"
-commit="${SLANG_COMMIT:-$(prop slangCommit)}"
-dest="$root/build/slang"
+repo="${ZELL_REPO:-$(prop zellRepo)}"
+commit="${ZELL_COMMIT:-$(prop zellCommit)}"
+dest="$root/build/zell"
 
 if [[ -z "$repo" || -z "$commit" ]]; then
-  echo "sync-slang: slangRepo/slangCommit missing in gradle.properties" >&2
+  echo "sync-zell: zellRepo/zellCommit missing in gradle.properties" >&2
   exit 1
 fi
 
 # --- 1. checkout -------------------------------------------------------------
 if [[ -d "$dest/.git" ]] && [[ "$(git -C "$dest" rev-parse HEAD 2>/dev/null)" == "$commit" ]]; then
-  echo "sync-slang: build/slang already at $commit"
+  echo "sync-zell: build/zell already at $commit"
 else
-  echo "sync-slang: fetching $repo @ $commit"
+  echo "sync-zell: fetching $repo @ $commit"
   rm -rf "$dest"
   mkdir -p "$dest"
   git -C "$dest" init -q
@@ -51,14 +51,14 @@ else
 fi
 
 # --- 2. grammar ----------------------------------------------------------------
-out_bnf="$root/src/main/grammar/Slang.bnf"
+out_bnf="$root/src/main/grammar/Zell.bnf"
 mkdir -p "$(dirname "$out_bnf")"
 
 # Upstream grammar + pending upstream patches, in a scratch copy.
-work="$root/build/slang-grammar"
+work="$root/build/zell-grammar"
 rm -rf "$work"
 mkdir -p "$work/grammar"
-cp "$dest/grammar/slang.bnf" "$work/grammar/slang.bnf"
+cp "$dest/grammar/zell.bnf" "$work/grammar/zell.bnf"
 applied=()
 shopt -s nullglob
 for p in "$root"/tools/grammar-patches/*.patch; do
@@ -66,59 +66,59 @@ for p in "$root"/tools/grammar-patches/*.patch; do
   if patch -s -p1 -d "$work" --dry-run -f < "$p" >/dev/null 2>&1; then
     patch -s -p1 -d "$work" -f --no-backup-if-mismatch < "$p"
     applied+=("$name")
-    echo "sync-slang: applied tools/grammar-patches/$name"
+    echo "sync-zell: applied tools/grammar-patches/$name"
   elif patch -s -p1 -d "$work" --dry-run -R -f < "$p" >/dev/null 2>&1; then
-    echo "sync-slang: tools/grammar-patches/$name is already upstream; delete it"
+    echo "sync-zell: tools/grammar-patches/$name is already upstream; delete it"
   else
-    echo "sync-slang: tools/grammar-patches/$name does not apply to grammar/slang.bnf @ $commit" >&2
+    echo "sync-zell: tools/grammar-patches/$name does not apply to grammar/zell.bnf @ $commit" >&2
     echo "            (upstream changed the grammar: rebase the patch or drop it)" >&2
     exit 1
   fi
 done
 shopt -u nullglob
-src_bnf="$work/grammar/slang.bnf"
+src_bnf="$work/grammar/zell.bnf"
 
 # Rules whose PSI is a named, stub-indexed declaration (see
-# org.slang.idea.stubs and org.slang.idea.psi.impl.SlangDeclMixin).
+# org.zell.idea.stubs and org.zell.idea.psi.impl.ZellDeclMixin).
 decls='struct_decl|interface_decl|enum_decl|func_decl|const_decl'
 
 {
-  echo "// GENERATED by tools/sync-slang.sh from grammar/slang.bnf of $(prop slangRepo)"
+  echo "// GENERATED by tools/sync-zell.sh from grammar/zell.bnf of $(prop zellRepo)"
   echo "// at commit $commit. Do not edit: change the grammar upstream and re-sync."
   if ((${#applied[@]})); then
     echo "// Pending upstream patches applied (tools/grammar-patches): ${applied[*]}"
   fi
   echo
   awk -v decls="$decls" '
-    # Header packages: org.slang.lang.* -> org.slang.idea.*
-    { gsub(/org\.slang\.lang\./, "org.slang.idea.") }
+    # Header packages: org.zell.lang.* -> org.zell.idea.*
+    { gsub(/org\.zell\.lang\./, "org.zell.idea.") }
     # Insert the plugin-specific attributes right before the token list.
     !done && /^[[:space:]]*tokens[[:space:]]*=[[:space:]]*\[/ {
-      print "  // ---- plugin-specific (tools/sync-slang.sh); not part of upstream grammar/slang.bnf ----"
+      print "  // ---- plugin-specific (tools/sync-zell.sh); not part of upstream grammar/zell.bnf ----"
       print "  // `>>` is lexed as two GT tokens for the parser so that nested generic"
-      print "  // arguments close (`List<List<int>>`); SlangParserUtil glues adjacent GT GT"
+      print "  // arguments close (`List<List<int>>`); ZellParserUtil glues adjacent GT GT"
       print "  // back into SHR (and GT GE into SHREQ) where the grammar asks for them."
-      print "  parserUtilClass=\"org.slang.idea.parser.SlangParserUtil\""
-      print "  implements(\"" decls "\")=\"org.slang.idea.psi.SlangNamedElement\""
-      print "  mixin(\"" decls "\")=\"org.slang.idea.psi.impl.SlangDeclMixin\""
-      print "  stubClass(\"" decls "\")=\"org.slang.idea.stubs.SlangDeclStub\""
-      print "  elementTypeFactory(\"" decls "\")=\"org.slang.idea.stubs.SlangStubElementTypes.factory\""
+      print "  parserUtilClass=\"org.zell.idea.parser.ZellParserUtil\""
+      print "  implements(\"" decls "\")=\"org.zell.idea.psi.ZellNamedElement\""
+      print "  mixin(\"" decls "\")=\"org.zell.idea.psi.impl.ZellDeclMixin\""
+      print "  stubClass(\"" decls "\")=\"org.zell.idea.stubs.ZellDeclStub\""
+      print "  elementTypeFactory(\"" decls "\")=\"org.zell.idea.stubs.ZellStubElementTypes.factory\""
       print "  // ---- end plugin-specific ----"
       print ""
       done = 1
     }
     { print }
-    END { if (!done) { print "sync-slang: no `tokens = [` in the grammar header" > "/dev/stderr"; exit 1 } }
+    END { if (!done) { print "sync-zell: no `tokens = [` in the grammar header" > "/dev/stderr"; exit 1 } }
   ' "$src_bnf"
 } > "$out_bnf.tmp"
 mv "$out_bnf.tmp" "$out_bnf"
 
-if grep -q 'org\.slang\.lang' "$out_bnf"; then
-  echo "sync-slang: unexpected org.slang.lang reference left in Slang.bnf" >&2
+if grep -q 'org\.zell\.lang' "$out_bnf"; then
+  echo "sync-zell: unexpected org.zell.lang reference left in Zell.bnf" >&2
   exit 1
 fi
 
-n_ex=$(find "$dest/examples" -name '*.sl' | wc -l)
-n_spec=$(find "$dest/tests/spec" -name '*.sl' | wc -l)
-n_std=$(find "$dest/std" -name '*.sl' 2>/dev/null | wc -l)
-echo "sync-slang: wrote src/main/grammar/Slang.bnf; corpus: $n_ex examples, $n_spec spec, $n_std std files in build/slang"
+n_ex=$(find "$dest/examples" -name '*.zl' | wc -l)
+n_spec=$(find "$dest/tests/spec" -name '*.zl' | wc -l)
+n_std=$(find "$dest/std" -name '*.zl' 2>/dev/null | wc -l)
+echo "sync-zell: wrote src/main/grammar/Zell.bnf; corpus: $n_ex examples, $n_spec spec, $n_std std files in build/zell"

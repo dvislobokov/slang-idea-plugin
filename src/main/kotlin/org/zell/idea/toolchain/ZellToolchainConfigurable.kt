@@ -1,4 +1,4 @@
-package org.slang.idea.toolchain
+package org.zell.idea.toolchain
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.BoundConfigurable
@@ -7,35 +7,35 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
 
-/** Settings | Languages & Frameworks | Slang. */
-class SlangToolchainConfigurable : BoundConfigurable("Slang") {
-    private val state get() = SlangToolchainSettings.getInstance().state
+/** Settings | Languages & Frameworks | Zell. */
+class ZellToolchainConfigurable : BoundConfigurable("Zell") {
+    private val state get() = ZellToolchainSettings.getInstance().state
 
     override fun createPanel(): DialogPanel = panel {
         group("Toolchain") {
-            row("slang:") {
-                textFieldWithBrowseButton("Select the slang Executable", null, FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor())
-                    .bindText(state::slangPath)
+            row("zell:") {
+                textFieldWithBrowseButton("Select the zell Executable", null, FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor())
+                    .bindText(state::zellPath)
                     .align(AlignX.FILL)
-                    .comment("Empty: detect on PATH, then ~/.slang/toolchain/current/bin. Detected: ${SlangToolchain.slangExecutable() ?: "not found"}")
+                    .comment("Empty: detect on PATH, then ~/.zell/toolchain/current/bin. Detected: ${ZellToolchain.zellExecutable() ?: "not found"}")
             }
-            row("slang-lsp:") {
-                textFieldWithBrowseButton("Select the slang-lsp Executable", null, FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor())
+            row("zell-lsp:") {
+                textFieldWithBrowseButton("Select the zell-lsp Executable", null, FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor())
                     .bindText(state::lspPath)
                     .align(AlignX.FILL)
-                    .comment("Empty: detect on PATH or next to slang; without it the IDE runs `slang lsp`. Detected: ${SlangToolchain.lspExecutable() ?: "not found"}")
+                    .comment("Empty: detect on PATH or next to zell; without it the IDE runs `zell lsp`. Detected: ${ZellToolchain.lspExecutable() ?: "not found"}")
             }
-            row("SLANG_HOME:") {
-                textFieldWithBrowseButton("Select SLANG_HOME", null, FileChooserDescriptorFactory.createSingleFolderDescriptor())
-                    .bindText(state::slangHome)
+            row("ZELL_HOME:") {
+                textFieldWithBrowseButton("Select ZELL_HOME", null, FileChooserDescriptorFactory.createSingleFolderDescriptor())
+                    .bindText(state::zellHome)
                     .align(AlignX.FILL)
-                    .comment("The standard library comes from `slang env SLANG_STD`, else SLANG_HOME/std. Install: scripts/install.sh from the slang repository.")
+                    .comment("The standard library comes from `zell env ZELL_STD`, else ZELL_HOME/std. Install: scripts/install.sh from the zell repository.")
             }
         }
     }
 
     override fun apply() {
         super.apply()
-        SlangToolchain.toolchainChanged()
+        ZellToolchain.toolchainChanged()
     }
 }

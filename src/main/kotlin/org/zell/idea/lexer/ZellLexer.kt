@@ -1,17 +1,17 @@
-package org.slang.idea.lexer
+package org.zell.idea.lexer
 
 import com.intellij.lexer.LexerBase
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
-import org.slang.idea.psi.SlangTokenTypes
-import org.slang.idea.psi.SlangTypes
+import org.zell.idea.psi.ZellTokenTypes
+import org.zell.idea.psi.ZellTypes
 
 /**
  * The parser lexer: the JFlex tokens plus Go-style automatic semicolons,
- * mirroring `compiler/src/lexer.rs` of the slang repository exactly:
+ * mirroring `compiler/src/lexer.rs` of the zell repository exactly:
  *
  * - at a newline (in whitespace or inside a multi-line block comment) and at
- *   the end of the input, a [SlangTypes.SEMI] is inserted when the previous
+ *   the end of the input, a [ZellTypes.SEMI] is inserted when the previous
  *   significant token ends a statement ([endsStatement], = `TokenKind::ends_statement`)
  *   or is a keyword directly after `.` (`namespace examples.async`);
  * - nothing is inserted while the innermost open delimiter is `(` or `[`
@@ -21,15 +21,15 @@ import org.slang.idea.psi.SlangTypes
  *
  * In addition, `>>` is split into two `>` tokens and `>>=` into `>` `>=`, so
  * that nested generic arguments close (`List<List<int>>`) the way the
- * compiler's `expect_gt` splits them; `SlangParserUtil` glues adjacent pairs
+ * compiler's `expect_gt` splits them; `ZellParserUtil` glues adjacent pairs
  * back into `SHR`/`SHREQ` where the grammar expects an operator.
  *
  * The whole input is tokenized in [start]; the lexer is used only by the
  * parser (always from the initial state), so [getState] is always 0.
- * Highlighting uses [SlangHighlightingLexer].
+ * Highlighting uses [ZellHighlightingLexer].
  */
-class SlangLexer : LexerBase() {
-    private val flex = SlangHighlightingLexer()
+class ZellLexer : LexerBase() {
+    private val flex = ZellHighlightingLexer()
 
     private var buffer: CharSequence = ""
     private var bufferEnd = 0
@@ -83,14 +83,14 @@ class SlangLexer : LexerBase() {
         fun maybeInsertSemi() {
             val l = last ?: return
             val top = delims.lastOrNull()
-            if (top == SlangTypes.LPAREN || top == SlangTypes.LBRACKET) return
-            val keywordName = beforeLast == SlangTypes.DOT && l in KEYWORDS
+            if (top == ZellTypes.LPAREN || top == ZellTypes.LBRACKET) return
+            val keywordName = beforeLast == ZellTypes.DOT && l in KEYWORDS
             if (!endsStatement(l) && !keywordName) return
             val at = ends[insertAfter]
-            insert(insertAfter + 1, SlangTypes.SEMI, at, at)
+            insert(insertAfter + 1, ZellTypes.SEMI, at, at)
             insertAfter += 1
             beforeLast = l
-            last = SlangTypes.SEMI
+            last = ZellTypes.SEMI
         }
 
         flex.start(buffer, startOffset, endOffset, 0)
@@ -103,29 +103,29 @@ class SlangLexer : LexerBase() {
                     if (containsNewline(s, e)) maybeInsertSemi()
                     add(type, s, e)
                 }
-                SlangTokenTypes.BLOCK_COMMENT -> {
+                ZellTokenTypes.BLOCK_COMMENT -> {
                     add(type, s, e)
                     // A comment spanning lines acts like a newline.
                     if (containsNewline(s, e)) maybeInsertSemi()
                 }
-                SlangTokenTypes.LINE_COMMENT -> add(type, s, e)
+                ZellTokenTypes.LINE_COMMENT -> add(type, s, e)
                 // The compiler skips unknown characters without a token.
                 TokenType.BAD_CHARACTER -> add(type, s, e)
                 else -> {
                     when (type) {
-                        SlangTypes.SHR -> {
-                            add(SlangTypes.GT, s, s + 1)
-                            add(SlangTypes.GT, s + 1, e)
+                        ZellTypes.SHR -> {
+                            add(ZellTypes.GT, s, s + 1)
+                            add(ZellTypes.GT, s + 1, e)
                         }
-                        SlangTypes.SHREQ -> {
-                            add(SlangTypes.GT, s, s + 1)
-                            add(SlangTypes.GE, s + 1, e)
+                        ZellTypes.SHREQ -> {
+                            add(ZellTypes.GT, s, s + 1)
+                            add(ZellTypes.GE, s + 1, e)
                         }
                         else -> add(type, s, e)
                     }
                     when (type) {
-                        SlangTypes.LPAREN, SlangTypes.LBRACKET, SlangTypes.LBRACE -> delims.add(type)
-                        SlangTypes.RPAREN, SlangTypes.RBRACKET, SlangTypes.RBRACE ->
+                        ZellTypes.LPAREN, ZellTypes.LBRACKET, ZellTypes.LBRACE -> delims.add(type)
+                        ZellTypes.RPAREN, ZellTypes.RBRACKET, ZellTypes.RBRACE ->
                             if (delims.isNotEmpty()) delims.removeAt(delims.size - 1)
                     }
                     beforeLast = last
@@ -169,28 +169,28 @@ class SlangLexer : LexerBase() {
         /** `TokenKind::keyword` of token.rs (including `_`). */
         @JvmField
         val KEYWORDS: Set<IElementType> = setOf(
-            SlangTypes.NAMESPACE, SlangTypes.IMPORT, SlangTypes.AS, SlangTypes.STRUCT,
-            SlangTypes.INTERFACE, SlangTypes.ENUM, SlangTypes.FUNC, SlangTypes.STATIC,
-            SlangTypes.ASYNC, SlangTypes.AWAIT, SlangTypes.VAR, SlangTypes.CONST,
-            SlangTypes.IF, SlangTypes.ELSE, SlangTypes.FOR, SlangTypes.IN,
-            SlangTypes.SWITCH, SlangTypes.CASE, SlangTypes.DEFAULT, SlangTypes.RETURN,
-            SlangTypes.BREAK, SlangTypes.CONTINUE, SlangTypes.DEFER, SlangTypes.TRY,
-            SlangTypes.CATCH, SlangTypes.NEW, SlangTypes.NIL, SlangTypes.TRUE,
-            SlangTypes.FALSE, SlangTypes.MAP, SlangTypes.THIS, SlangTypes.UNDERSCORE,
+            ZellTypes.NAMESPACE, ZellTypes.IMPORT, ZellTypes.AS, ZellTypes.STRUCT,
+            ZellTypes.INTERFACE, ZellTypes.ENUM, ZellTypes.FUNC, ZellTypes.STATIC,
+            ZellTypes.ASYNC, ZellTypes.AWAIT, ZellTypes.VAR, ZellTypes.CONST,
+            ZellTypes.IF, ZellTypes.ELSE, ZellTypes.FOR, ZellTypes.IN,
+            ZellTypes.SWITCH, ZellTypes.CASE, ZellTypes.DEFAULT, ZellTypes.RETURN,
+            ZellTypes.BREAK, ZellTypes.CONTINUE, ZellTypes.DEFER, ZellTypes.TRY,
+            ZellTypes.CATCH, ZellTypes.NEW, ZellTypes.NIL, ZellTypes.TRUE,
+            ZellTypes.FALSE, ZellTypes.MAP, ZellTypes.THIS, ZellTypes.UNDERSCORE,
         )
 
         /** `TokenKind::ends_statement` of token.rs. */
         @JvmField
         val ENDS_STATEMENT: Set<IElementType> = setOf(
-            SlangTypes.IDENTIFIER,
-            SlangTypes.INT_LITERAL, SlangTypes.FLOAT_LITERAL,
-            SlangTypes.STRING_LITERAL, SlangTypes.RAW_STRING_LITERAL, SlangTypes.CHAR_LITERAL,
-            SlangTypes.RETURN, SlangTypes.BREAK, SlangTypes.CONTINUE,
-            SlangTypes.NIL, SlangTypes.TRUE, SlangTypes.FALSE, SlangTypes.THIS, SlangTypes.UNDERSCORE,
-            SlangTypes.RPAREN, SlangTypes.RBRACE, SlangTypes.RBRACKET,
-            SlangTypes.QUESTION, SlangTypes.BANG,
+            ZellTypes.IDENTIFIER,
+            ZellTypes.INT_LITERAL, ZellTypes.FLOAT_LITERAL,
+            ZellTypes.STRING_LITERAL, ZellTypes.RAW_STRING_LITERAL, ZellTypes.CHAR_LITERAL,
+            ZellTypes.RETURN, ZellTypes.BREAK, ZellTypes.CONTINUE,
+            ZellTypes.NIL, ZellTypes.TRUE, ZellTypes.FALSE, ZellTypes.THIS, ZellTypes.UNDERSCORE,
+            ZellTypes.RPAREN, ZellTypes.RBRACE, ZellTypes.RBRACKET,
+            ZellTypes.QUESTION, ZellTypes.BANG,
             // closing generic arguments: `var nf NotFound<string>`
-            SlangTypes.GT, SlangTypes.SHR,
+            ZellTypes.GT, ZellTypes.SHR,
         )
 
         /** Whether a newline directly after [type] ends a statement. */

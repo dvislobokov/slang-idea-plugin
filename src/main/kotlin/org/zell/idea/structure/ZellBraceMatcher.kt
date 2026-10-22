@@ -1,12 +1,12 @@
-package org.slang.idea.structure
+package org.zell.idea.structure
 
 import com.intellij.lang.BracePair
 import com.intellij.lang.PairedBraceMatcher
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
-import org.slang.idea.psi.SlangTypes
+import org.zell.idea.psi.ZellTypes
 
-class SlangBraceMatcher : PairedBraceMatcher {
+class ZellBraceMatcher : PairedBraceMatcher {
     override fun getPairs(): Array<BracePair> = PAIRS
 
     override fun isPairedBracesAllowedBeforeType(lbraceType: IElementType, contextType: IElementType?): Boolean = true
@@ -15,9 +15,9 @@ class SlangBraceMatcher : PairedBraceMatcher {
 
     private companion object {
         val PAIRS = arrayOf(
-            BracePair(SlangTypes.LBRACE, SlangTypes.RBRACE, true),
-            BracePair(SlangTypes.LPAREN, SlangTypes.RPAREN, false),
-            BracePair(SlangTypes.LBRACKET, SlangTypes.RBRACKET, false),
+            BracePair(ZellTypes.LBRACE, ZellTypes.RBRACE, true),
+            BracePair(ZellTypes.LPAREN, ZellTypes.RPAREN, false),
+            BracePair(ZellTypes.LBRACKET, ZellTypes.RBRACKET, false),
         )
     }
 }

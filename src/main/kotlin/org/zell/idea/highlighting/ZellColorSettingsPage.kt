@@ -1,18 +1,18 @@
-package org.slang.idea.highlighting
+package org.zell.idea.highlighting
 
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileTypes.SyntaxHighlighter
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.options.colors.ColorDescriptor
 import com.intellij.openapi.options.colors.ColorSettingsPage
-import org.slang.idea.lang.SlangIcons
+import org.zell.idea.lang.ZellIcons
 import javax.swing.Icon
 
-/** Settings | Editor | Color Scheme | Slang. */
-class SlangColorSettingsPage : ColorSettingsPage {
-    override fun getIcon(): Icon = SlangIcons.FILE
+/** Settings | Editor | Color Scheme | Zell. */
+class ZellColorSettingsPage : ColorSettingsPage {
+    override fun getIcon(): Icon = ZellIcons.FILE
 
-    override fun getHighlighter(): SyntaxHighlighter = SlangSyntaxHighlighter()
+    override fun getHighlighter(): SyntaxHighlighter = ZellSyntaxHighlighter()
 
     override fun getDemoText(): String = DEMO
 
@@ -22,46 +22,46 @@ class SlangColorSettingsPage : ColorSettingsPage {
 
     override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
 
-    override fun getDisplayName(): String = "Slang"
+    override fun getDisplayName(): String = "Zell"
 
     private companion object {
         val TAGS: Map<String, TextAttributesKey> = mapOf(
-            "attr" to SlangColors.ATTRIBUTE,
-            "type" to SlangColors.TYPE_NAME,
-            "iface" to SlangColors.INTERFACE_NAME,
-            "fn" to SlangColors.FUNCTION_DECLARATION,
-            "const" to SlangColors.CONST_DECLARATION,
-            "ns" to SlangColors.NAMESPACE,
+            "attr" to ZellColors.ATTRIBUTE,
+            "type" to ZellColors.TYPE_NAME,
+            "iface" to ZellColors.INTERFACE_NAME,
+            "fn" to ZellColors.FUNCTION_DECLARATION,
+            "const" to ZellColors.CONST_DECLARATION,
+            "ns" to ZellColors.NAMESPACE,
         )
 
         val DESCRIPTORS: Array<AttributesDescriptor> = arrayOf(
-            AttributesDescriptor("Keyword", SlangColors.KEYWORD),
-            AttributesDescriptor("nil, true, false", SlangColors.CONSTANT),
-            AttributesDescriptor("String", SlangColors.STRING),
-            AttributesDescriptor("Char", SlangColors.CHAR),
-            AttributesDescriptor("Number", SlangColors.NUMBER),
-            AttributesDescriptor("Comments//Line comment", SlangColors.LINE_COMMENT),
-            AttributesDescriptor("Comments//Block comment", SlangColors.BLOCK_COMMENT),
-            AttributesDescriptor("Operators//Operator", SlangColors.OPERATOR),
-            AttributesDescriptor("Operators//Error propagation ?", SlangColors.QUESTION),
-            AttributesDescriptor("Braces and punctuation//Braces", SlangColors.BRACES),
-            AttributesDescriptor("Braces and punctuation//Brackets", SlangColors.BRACKETS),
-            AttributesDescriptor("Braces and punctuation//Parentheses", SlangColors.PARENTHESES),
-            AttributesDescriptor("Braces and punctuation//Comma", SlangColors.COMMA),
-            AttributesDescriptor("Braces and punctuation//Semicolon", SlangColors.SEMICOLON),
-            AttributesDescriptor("Braces and punctuation//Dot", SlangColors.DOT),
-            AttributesDescriptor("Identifier", SlangColors.IDENTIFIER),
-            AttributesDescriptor("Attribute", SlangColors.ATTRIBUTE),
-            AttributesDescriptor("Declarations//Type name", SlangColors.TYPE_NAME),
-            AttributesDescriptor("Declarations//Interface name", SlangColors.INTERFACE_NAME),
-            AttributesDescriptor("Declarations//Function declaration", SlangColors.FUNCTION_DECLARATION),
-            AttributesDescriptor("Declarations//Constant declaration", SlangColors.CONST_DECLARATION),
-            AttributesDescriptor("Namespace", SlangColors.NAMESPACE),
-            AttributesDescriptor("Bad character", SlangColors.BAD_CHARACTER),
+            AttributesDescriptor("Keyword", ZellColors.KEYWORD),
+            AttributesDescriptor("nil, true, false", ZellColors.CONSTANT),
+            AttributesDescriptor("String", ZellColors.STRING),
+            AttributesDescriptor("Char", ZellColors.CHAR),
+            AttributesDescriptor("Number", ZellColors.NUMBER),
+            AttributesDescriptor("Comments//Line comment", ZellColors.LINE_COMMENT),
+            AttributesDescriptor("Comments//Block comment", ZellColors.BLOCK_COMMENT),
+            AttributesDescriptor("Operators//Operator", ZellColors.OPERATOR),
+            AttributesDescriptor("Operators//Error propagation ?", ZellColors.QUESTION),
+            AttributesDescriptor("Braces and punctuation//Braces", ZellColors.BRACES),
+            AttributesDescriptor("Braces and punctuation//Brackets", ZellColors.BRACKETS),
+            AttributesDescriptor("Braces and punctuation//Parentheses", ZellColors.PARENTHESES),
+            AttributesDescriptor("Braces and punctuation//Comma", ZellColors.COMMA),
+            AttributesDescriptor("Braces and punctuation//Semicolon", ZellColors.SEMICOLON),
+            AttributesDescriptor("Braces and punctuation//Dot", ZellColors.DOT),
+            AttributesDescriptor("Identifier", ZellColors.IDENTIFIER),
+            AttributesDescriptor("Attribute", ZellColors.ATTRIBUTE),
+            AttributesDescriptor("Declarations//Type name", ZellColors.TYPE_NAME),
+            AttributesDescriptor("Declarations//Interface name", ZellColors.INTERFACE_NAME),
+            AttributesDescriptor("Declarations//Function declaration", ZellColors.FUNCTION_DECLARATION),
+            AttributesDescriptor("Declarations//Constant declaration", ZellColors.CONST_DECLARATION),
+            AttributesDescriptor("Namespace", ZellColors.NAMESPACE),
+            AttributesDescriptor("Bad character", ZellColors.BAD_CHARACTER),
         )
 
         val DEMO = """
-            |// A small Slang program
+            |// A small Zell program
             |namespace <ns>examples.shapes</ns>
             |
             |import <ns>std.io</ns>

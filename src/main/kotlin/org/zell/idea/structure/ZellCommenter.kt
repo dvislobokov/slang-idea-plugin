@@ -1,9 +1,9 @@
-package org.slang.idea.structure
+package org.zell.idea.structure
 
 import com.intellij.lang.Commenter
 
-/** `//` line comments, `/* */` block comments (nestable in Slang). */
-class SlangCommenter : Commenter {
+/** `//` line comments, `/* */` block comments (nestable in Zell). */
+class ZellCommenter : Commenter {
     override fun getLineCommentPrefix(): String = "//"
 
     override fun getBlockCommentPrefix(): String = "/*"

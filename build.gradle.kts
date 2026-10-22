@@ -54,7 +54,7 @@ intellijPlatform {
     buildSearchableOptions = false
 
     pluginConfiguration {
-        id = "org.slang.idea"
+        id = "org.zell.idea"
         name = providers.gradleProperty("pluginName")
         version = providers.gradleProperty("pluginVersion")
         ideaVersion {
@@ -77,32 +77,32 @@ intellijPlatform {
 }
 
 // ---------------------------------------------------------------------------
-// Grammar-Kit: lexer from src/main/grammar/Slang.flex, parser + PSI from
-// src/main/grammar/Slang.bnf (copied from the slang repo by tools/sync-slang.sh).
+// Grammar-Kit: lexer from src/main/grammar/Zell.flex, parser + PSI from
+// src/main/grammar/Zell.bnf (copied from the zell repo by tools/sync-zell.sh).
 // ---------------------------------------------------------------------------
 
-val generateSlangLexer by tasks.registering(GenerateLexerTask::class) {
-    sourceFile = layout.projectDirectory.file("src/main/grammar/Slang.flex")
+val generateZellLexer by tasks.registering(GenerateLexerTask::class) {
+    sourceFile = layout.projectDirectory.file("src/main/grammar/Zell.flex")
     // purgeOldFiles wipes this whole directory: keep it lexer-only.
-    targetOutputDir = layout.projectDirectory.dir("src/main/gen/org/slang/idea/lexer")
+    targetOutputDir = layout.projectDirectory.dir("src/main/gen/org/zell/idea/lexer")
     purgeOldFiles = true
 }
 
-val generateSlangParser by tasks.registering(GenerateParserTask::class) {
-    sourceFile = layout.projectDirectory.file("src/main/grammar/Slang.bnf")
+val generateZellParser by tasks.registering(GenerateParserTask::class) {
+    sourceFile = layout.projectDirectory.file("src/main/grammar/Zell.bnf")
     targetRootOutputDir = layout.projectDirectory.dir("src/main/gen")
-    pathToParser = "org/slang/idea/parser/SlangParser.java"
-    pathToPsiRoot = "org/slang/idea/psi"
+    pathToParser = "org/zell/idea/parser/ZellParser.java"
+    pathToPsiRoot = "org/zell/idea/psi"
     purgeOldFiles = true
 }
 
 tasks {
-    compileJava { dependsOn(generateSlangLexer, generateSlangParser) }
-    compileKotlin { dependsOn(generateSlangLexer, generateSlangParser) }
+    compileJava { dependsOn(generateZellLexer, generateZellParser) }
+    compileKotlin { dependsOn(generateZellLexer, generateZellParser) }
 
     test {
-        // The parser corpus test reads build/slang (tools/sync-slang.sh).
-        systemProperty("slang.corpus", layout.buildDirectory.dir("slang").get().asFile.absolutePath)
-        inputs.dir(layout.buildDirectory.dir("slang")).optional().withPropertyName("slangCorpus")
+        // The parser corpus test reads build/zell (tools/sync-zell.sh).
+        systemProperty("zell.corpus", layout.buildDirectory.dir("zell").get().asFile.absolutePath)
+        inputs.dir(layout.buildDirectory.dir("zell")).optional().withPropertyName("zellCorpus")
     }
 }
